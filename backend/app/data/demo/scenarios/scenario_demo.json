@@ -1,0 +1,27 @@
+{
+  "scenario_name": "Tehri Dam PMF Overtopping & Rapid Piping Breach (Synthetic Baseline)",
+  "is_demo_data": true,
+  "notice": "DEMO DATA NOTICE: All datasets in this demo package are synthetic demonstration layers generated for decision-support modeling. They MUST NEVER be represented as actual Indian ground survey observations.",
+  "parameters": {
+    "dam_id": "dam-tehri-001",
+    "reservoir_water_level": 830.0,
+    "breach_width_m": 120.0,
+    "breach_depth_m": 45.0,
+    "breach_formation_time_hr": 1.5,
+    "simulation_duration_hr": 6.0,
+    "manning_n": 0.035,
+    "grid_resolution_m": 50,
+    "model_type": "GRID_2D",
+    "inflow_peak_m3s": 15500.0,
+    "breach_type": "Overtopping & Piping",
+    "description": "Synthetic extreme Probable Maximum Flood (PMF) stress scenario for Tehri Hydro-electric complex downstream hazard zone evaluation."
+  },
+  "expected_metrics": {
+    "max_discharge_m3s": 48500.0,
+    "peak_arrival_koti_min": 18.0,
+    "peak_arrival_downstream_min": 42.0,
+    "max_depth_m": 14.8,
+    "max_velocity_ms": 7.4,
+    "inundated_area_sqkm": 28.6
+  }
+}

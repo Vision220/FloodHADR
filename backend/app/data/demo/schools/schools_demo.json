@@ -1,0 +1,53 @@
+{
+  "dataset_name": "Tehri Educational Institutions & Shelters - Synthetic Demo Layer",
+  "is_demo_data": true,
+  "notice": "DEMO DATA NOTICE: All datasets in this demo package are synthetic demonstration layers generated for decision-support modeling. They MUST NEVER be represented as actual Indian ground survey observations.",
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "sch-001",
+      "properties": {
+        "name": "Government Higher Secondary School New Tehri",
+        "type": "High School",
+        "capacity": 650,
+        "shelter_designated": true,
+        "is_demo": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [78.4710, 30.3830]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sch-002",
+      "properties": {
+        "name": "Tehri Public Inter College",
+        "type": "Inter College",
+        "capacity": 800,
+        "shelter_designated": true,
+        "is_demo": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [78.4840, 30.3735]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sch-003",
+      "properties": {
+        "name": "Valley Primary School Koti",
+        "type": "Primary School",
+        "capacity": 220,
+        "shelter_designated": false,
+        "is_demo": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [78.4910, 30.3670]
+      }
+    }
+  ]
+}

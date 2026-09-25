@@ -1,0 +1,21 @@
+{
+  "dataset_id": "dem-tehri-synthetic",
+  "name": "Synthetic ALOS PALSAR 12m DEM Terrain Grid",
+  "crs": "EPSG:4326 (WGS 84)",
+  "resolution": "12m ALOS PALSAR",
+  "width": 120,
+  "height": 80,
+  "bounds": [78.20, 30.05, 78.62, 30.42],
+  "min_elevation_m": 280.0,
+  "max_elevation_m": 2600.0,
+  "mean_elevation_m": 845.2,
+  "is_demo_data": true,
+  "notice": "DEMO DATA NOTICE: All datasets in this demo package are synthetic demonstration layers generated for decision-support modeling. They MUST NEVER be represented as actual Indian ground survey observations.",
+  "features": {
+    "elevated_flanks": "High mountain ridges (1500m - 2600m MSL)",
+    "upstream_reservoir": "Tehri Hydro Reservoir (830m FRL)",
+    "dam_structure": "Embankment crest at x=78.4802, y=30.3781 (825m elevation)",
+    "river_gorge_valley": "Bhagirathi steep gorge channel corridor",
+    "downstream_floodplain": "Rishikesh-Haridwar valley lowlands (280m - 340m)"
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "dataset_id": "bldg-demo-001",
+  "name": "Synthetic Residential & Commercial Settlement Clusters",
+  "is_demo_data": true,
+  "notice": "DEMO DATA NOTICE: Synthetic building footprints generated for decision support modeling.",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "bldg-1",
+        "name": "Tehri Downstream Settlement Alpha",
+        "layer": "buildings",
+        "type": "Building Cluster",
+        "units": 45,
+        "is_synthetic_demo": true
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[78.475, 30.365], [78.482, 30.365], [78.482, 30.360], [78.475, 30.360], [78.475, 30.365]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "bldg-2",
+        "name": "Devprayag Confluence Bazaar",
+        "layer": "buildings",
+        "type": "Building Cluster",
+        "units": 110,
+        "is_synthetic_demo": true
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[78.592, 30.148], [78.602, 30.148], [78.602, 30.142], [78.592, 30.142], [78.592, 30.148]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "bldg-3",
+        "name": "Rishikesh Lowland Colony Sector-4",
+        "layer": "buildings",
+        "type": "Building Cluster",
+        "units": 240,
+        "is_synthetic_demo": true
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[78.260, 30.082], [78.272, 30.082], [78.272, 30.075], [78.260, 30.075], [78.260, 30.082]]]
+      }
+    }
+  ]
+}

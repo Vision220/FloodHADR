@@ -1,0 +1,56 @@
+{
+  "dataset_name": "Tehri District Medical Facilities - Synthetic Demo Layer",
+  "is_demo_data": true,
+  "notice": "DEMO DATA NOTICE: All datasets in this demo package are synthetic demonstration layers generated for decision-support modeling. They MUST NEVER be represented as actual Indian ground survey observations.",
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "hosp-001",
+      "properties": {
+        "name": "District Hospital New Tehri",
+        "facility_type": "District Hospital",
+        "beds": 150,
+        "emergency_unit": true,
+        "helipad": true,
+        "is_demo": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [78.4725, 30.3812]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "hosp-002",
+      "properties": {
+        "name": "Tehri Hydro Complex Emergency Trauma Center",
+        "facility_type": "Trauma Center",
+        "beds": 45,
+        "emergency_unit": true,
+        "helipad": true,
+        "is_demo": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [78.4815, 30.3752]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "hosp-003",
+      "properties": {
+        "name": "Koti Community Health Sub-Center",
+        "facility_type": "Primary Health Center",
+        "beds": 15,
+        "emergency_unit": false,
+        "helipad": false,
+        "is_demo": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [78.4892, 30.3685]
+      }
+    }
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "dataset_name": "Tehri Valley Transport Network - Synthetic Demo Layer",
+  "is_demo_data": true,
+  "notice": "DEMO DATA NOTICE: All datasets in this demo package are synthetic demonstration layers generated for decision-support modeling. They MUST NEVER be represented as actual Indian ground survey observations.",
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "rd-001",
+      "properties": {
+        "name": "NH-58 Tehri-Rishikesh Highway (Segment 1)",
+        "road_type": "National Highway",
+        "surface": "Asphalt",
+        "lanes": 2,
+        "criticality": "HIGH",
+        "is_demo": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [78.4750, 30.3850],
+          [78.4800, 30.3800],
+          [78.4850, 30.3750],
+          [78.4900, 30.3700],
+          [78.4980, 30.3650],
+          [78.5050, 30.3600]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "rd-002",
+      "properties": {
+        "name": "New Tehri Bypass Road",
+        "road_type": "State Highway",
+        "surface": "Asphalt",
+        "lanes": 2,
+        "criticality": "MEDIUM",
+        "is_demo": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [78.4720, 30.3820],
+          [78.4760, 30.3790],
+          [78.4810, 30.3740],
+          [78.4870, 30.3680]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "rd-003",
+      "properties": {
+        "name": "Koti Colony Dam Access Road",
+        "road_type": "Local Access",
+        "surface": "Paved",
+        "lanes": 1,
+        "criticality": "CRITICAL",
+        "is_demo": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [78.4780, 30.3780],
+          [78.4830, 30.3750],
+          [78.4870, 30.3730]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "rd-004",
+      "properties": {
+        "name": "Chamba Access Corridor",
+        "road_type": "Major District Road",
+        "surface": "Asphalt",
+        "lanes": 2,
+        "criticality": "HIGH",
+        "is_demo": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [78.4600, 30.3950],
+          [78.4680, 30.3900],
+          [78.4750, 30.3850]
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "dataset_id": "riv-bhagirathi-demo",
+  "name": "Bhagirathi / Ganga River Channel Reach",
+  "river_name": "Bhagirathi / Ganga River",
+  "length_km": 65.4,
+  "average_slope": "0.008 m/m",
+  "is_demo_data": true,
+  "notice": "DEMO DATA NOTICE: Synthetic demonstration layer generated for prototype decision support modeling.",
+  "geometry": {
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Bhagirathi Main Channel Centerline",
+          "is_demo_data": true
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [78.498, 30.378], [78.495, 30.340], [78.502, 30.280],
+            [78.525, 30.200], [78.598, 30.145], [78.420, 30.138],
+            [78.325, 30.122], [78.267, 30.086]
+          ]
+        }
+      }
+    ]
+  }
+}

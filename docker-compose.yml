@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  floodhadr-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: floodhadr_platform
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - ENVIRONMENT=production
+    volumes:
+      - floodhadr_data:/app/backend/uploads
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  floodhadr_data:

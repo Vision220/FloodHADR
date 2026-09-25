@@ -1,0 +1,127 @@
+import type { ScenarioParams, InfrastructureBuilding } from '../types/3dTypes';
+
+// Preset Scenarios A, B, C as specified by prompt
+export const PRESET_SCENARIOS: Record<'scenario-a' | 'scenario-b' | 'scenario-c', ScenarioParams> = {
+  'scenario-a': {
+    id: 'scenario-a',
+    name: 'Scenario A: Small Breach',
+    description: 'Partial piping breach with 50m final breach width & 60-min formation time.',
+    reservoirWaterLevelM: 220,
+    reservoirStorageMm3: 1800,
+    reservoirAreaKm2: 24.5,
+    damHeightM: 240,
+    damLengthM: 520,
+    breachWidthM: 30,
+    finalBreachWidthM: 50,
+    breachFormationTimeMin: 60,
+    simulationDurationMin: 120,
+    terrainScale: 1.0,
+    floodSpeedMultiplier: 1.0,
+  },
+  'scenario-b': {
+    id: 'scenario-b',
+    name: 'Scenario B: Medium Breach',
+    description: 'Moderate overtopping failure with 120m final breach width & 45-min formation time.',
+    reservoirWaterLevelM: 240,
+    reservoirStorageMm3: 2800,
+    reservoirAreaKm2: 36.0,
+    damHeightM: 240,
+    damLengthM: 520,
+    breachWidthM: 60,
+    finalBreachWidthM: 120,
+    breachFormationTimeMin: 45,
+    simulationDurationMin: 120,
+    terrainScale: 1.0,
+    floodSpeedMultiplier: 1.2,
+  },
+  'scenario-c': {
+    id: 'scenario-c',
+    name: 'Scenario C: Large Breach',
+    description: 'Catastrophic PMF collapse with 220m final breach width & 20-min rapid formation time.',
+    reservoirWaterLevelM: 260,
+    reservoirStorageMm3: 3540,
+    reservoirAreaKm2: 42.0,
+    damHeightM: 240,
+    damLengthM: 520,
+    breachWidthM: 100,
+    finalBreachWidthM: 220,
+    breachFormationTimeMin: 20,
+    simulationDurationMin: 120,
+    terrainScale: 1.0,
+    floodSpeedMultiplier: 1.5,
+  }
+};
+
+// Initial Default Scenario
+export const DEFAULT_3D_SCENARIO: ScenarioParams = PRESET_SCENARIOS['scenario-b'];
+
+// Synthetic Downstream Infrastructure Assets in 3D World Space coordinates
+// World space: Dam is at Z = -30, X = 0. Reservoir is Z < -30. Downstream valley is Z > -30 (Z = -30 to Z = +180)
+export const INITIAL_DEMO_INFRASTRUCTURE: InfrastructureBuilding[] = [
+  {
+    id: 'bldg-res-1',
+    name: 'Upper Valley Village Sector A',
+    type: 'Residential',
+    position: [-15, 6, 20],
+    elevation: 6,
+    isCritical: false,
+    status: 'NORMAL',
+    subtext: '45 Residential Houses',
+    currentDepthM: 0,
+  },
+  {
+    id: 'bldg-bridge-1',
+    name: 'Bhagirathi Main Arterial Bridge',
+    type: 'Bridge',
+    position: [0, 8, 45],
+    elevation: 8,
+    isCritical: true,
+    status: 'NORMAL',
+    subtext: 'Double-Lane Reinforced Bridge (NH-58)',
+    currentDepthM: 0,
+  },
+  {
+    id: 'bldg-school-1',
+    name: 'Valley Higher Secondary School',
+    type: 'School',
+    position: [22, 9, 65],
+    elevation: 9,
+    isCritical: true,
+    status: 'NORMAL',
+    subtext: '520 Enrolled Students',
+    currentDepthM: 0,
+  },
+  {
+    id: 'bldg-substation-1',
+    name: 'Hydro Grid Power Substation #2',
+    type: 'Substation',
+    position: [-28, 11, 85],
+    elevation: 11,
+    isCritical: true,
+    status: 'NORMAL',
+    subtext: '132kV Main Grid Step-Down',
+    currentDepthM: 0,
+  },
+  {
+    id: 'bldg-hospital-1',
+    name: 'District Base Hospital',
+    type: 'Hospital',
+    position: [18, 14, 120],
+    elevation: 14,
+    isCritical: true,
+    status: 'NORMAL',
+    subtext: '180 Patient Beds & Emergency Care',
+    currentDepthM: 0,
+  },
+  {
+    id: 'bldg-res-2',
+    name: 'Downstream Riverbank Colony',
+    type: 'Residential',
+    position: [-10, 5, 135],
+    elevation: 5,
+    isCritical: false,
+    status: 'NORMAL',
+    subtext: '110 Housing Units',
+    currentDepthM: 0,
+  }
+];

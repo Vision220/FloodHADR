@@ -1,0 +1,18 @@
+{
+  "id": "dam-tehri-demo",
+  "name": "Tehri Earth and Rockfill Dam",
+  "river": "Bhagirathi River",
+  "study_area_id": "sa-tehri-demo",
+  "height_m": 260.5,
+  "crest_length_m": 575.0,
+  "reservoir_volume_mm3": 3540.0,
+  "full_reservoir_level_m": 830.0,
+  "current_water_level_m": 822.4,
+  "dam_type": "Rockfill",
+  "construction_year": 2006,
+  "spillway_capacity_m3s": 15540.0,
+  "latitude": 30.3781,
+  "longitude": 78.4802,
+  "is_demo_data": true,
+  "notice": "DEMO DATA NOTICE: Synthetic dam specification layer generated for prototype decision support modeling."
+}
