@@ -1,5 +1,7 @@
+import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import engine, Base, AsyncSessionLocal
@@ -147,6 +149,11 @@ app.include_router(multi_model.router, prefix=settings.API_V1_STR)
 app.include_router(sensors.router, prefix=settings.API_V1_STR)
 app.include_router(predictive.router, prefix=settings.API_V1_STR)
 app.include_router(gee_routes.router, prefix=settings.API_V1_STR)
+
+# Serve compiled static frontend when packaged in Docker or production
+static_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static")
+if os.path.exists(static_dir):
+    app.mount("/", StaticFiles(directory=static_dir, html=True), name="static")
 
 
 
