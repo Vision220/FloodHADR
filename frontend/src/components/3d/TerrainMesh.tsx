@@ -7,7 +7,7 @@ interface TerrainMeshProps {
 
 export const TerrainMesh: React.FC<TerrainMeshProps> = ({ terrainScale = 1.0 }) => {
   // Generate procedural river valley terrain mesh and tree positions
-  const { geometry, wireframeGeometry, treePositions } = useMemo(() => {
+  const { geometry, wireframeGeometry } = useMemo(() => {
     const width = 160;
     const depth = 240;
     const segX = 120;

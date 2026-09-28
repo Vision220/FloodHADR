@@ -678,7 +678,7 @@ export const GISMapModule: React.FC<GISMapModuleProps> = ({
         {layerVisibility.infrastructure && (
           <GeoJSON
             data={sampleInfrastructureGeoJSON as any}
-            pointToLayer={(feature, latlng) => {
+            pointToLayer={(_feature, latlng) => {
               const isSubmerged = currentTimeMin >= 30;
               const color = isSubmerged ? '#dc2626' : '#059669';
               return L.circleMarker(latlng, { radius: 8, fillColor: color, color: '#ffffff', weight: 2, fillOpacity: 0.95 });

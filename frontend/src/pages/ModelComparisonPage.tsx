@@ -1,11 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Cpu,
-  Layers,
   ShieldAlert,
-  Sliders,
-  CheckCircle2,
-  AlertCircle,
   Waves,
   Droplets,
   Zap,
@@ -21,8 +17,8 @@ interface PairComparisonResponse {
   status: string;
   model_a: string;
   model_b: string;
-  scenario_a_id: str;
-  scenario_b_id: str;
+  scenario_a_id: string;
+  scenario_b_id: string;
   scenario_mismatch: boolean;
   scenario_mismatch_warning: string | null;
   common_spatial_domain: {

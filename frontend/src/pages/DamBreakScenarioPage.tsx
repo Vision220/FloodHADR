@@ -58,6 +58,10 @@ export const DamBreakScenarioPage: React.FC = () => {
 
   // Field change handler
   const handleChange = (field: keyof ScenarioFormState, value: any) => {
+    if (field === 'breachType') {
+      loadPreset(value as BreachTypeOption);
+      return;
+    }
     setFormState((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: '' }));
