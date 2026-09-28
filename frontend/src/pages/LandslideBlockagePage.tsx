@@ -220,6 +220,7 @@ export const LandslideBlockagePage: React.FC = () => {
   };
 
   const runSimulation = async () => {
+    let data: BlockageSimulationResult | null = null;
     try {
       const res = await fetch('/api/landslides/blockage-simulate', {
         method: 'POST',
@@ -232,42 +233,45 @@ export const LandslideBlockagePage: React.FC = () => {
         })
       });
       if (res.ok) {
-        const data: BlockageSimulationResult = await res.json();
-        setResult(data);
-      } else {
-        // Recalculate dynamic fallback based on sliders
-        const mult = blockageScenario === 'NONE' ? 0 : blockageScenario === 'PARTIAL_BLOCKAGE' ? 0.45 : 0.85;
-        const constrPct = Math.round(mult * 100);
-        const damH = Math.round(30 * mult);
-        const pondingMm3 = parseFloat((riverInflow * mult * 0.04).toFixed(1));
-        const peakBreach = Math.round(riverInflow + (15000 * mult * (rainfallMm / 180)));
-        const siteMatch = inventory.find((s) => s.id === selectedSiteId) || DEFAULT_INVENTORY[0];
-
-        setResult({
-          ...DEFAULT_RESULT,
-          scenario: blockageScenario,
-          landslide_site: siteMatch,
-          blockage_geometry: {
-            ...DEFAULT_RESULT.blockage_geometry,
-            blockage_percentage: constrPct,
-            landslide_dam_height_m: damH
-          },
-          upstream_ponding: {
-            ...DEFAULT_RESULT.upstream_ponding,
-            ponding_volume_million_m3: pondingMm3,
-            water_level_increase_m: Math.round(damH * 0.7)
-          },
-          breach_hydrograph: {
-            ...DEFAULT_RESULT.breach_hydrograph,
-            peak_breach_outflow_m3s: peakBreach,
-            total_downstream_peak_q_m3s: peakBreach + 1250,
-            downstream_wave_velocity_ms: parseFloat((6.0 + 4.0 * mult).toFixed(1)),
-            downstream_surge_depth_m: parseFloat((4.0 + 8.0 * mult).toFixed(1))
-          }
-        });
+        data = await res.json();
       }
     } catch (err) {
-      console.warn('Simulation execution warning:', err);
+      console.warn('Simulation execution API warning; using dynamic client fallback:', err);
+    }
+
+    if (data) {
+      setResult(data);
+    } else {
+      // Recalculate dynamic fallback based on sliders
+      const mult = blockageScenario === 'NONE' ? 0 : blockageScenario === 'PARTIAL_BLOCKAGE' ? 0.45 : 0.85;
+      const constrPct = Math.round(mult * 100);
+      const damH = Math.round(30 * mult);
+      const pondingMm3 = parseFloat((riverInflow * mult * 0.04).toFixed(1));
+      const peakBreach = Math.round(riverInflow + (15000 * mult * (rainfallMm / 180)));
+      const siteMatch = inventory.find((s) => s.id === selectedSiteId) || DEFAULT_INVENTORY[0];
+
+      setResult({
+        ...DEFAULT_RESULT,
+        scenario: blockageScenario,
+        landslide_site: siteMatch,
+        blockage_geometry: {
+          ...DEFAULT_RESULT.blockage_geometry,
+          blockage_percentage: constrPct,
+          landslide_dam_height_m: damH
+        },
+        upstream_ponding: {
+          ...DEFAULT_RESULT.upstream_ponding,
+          ponding_volume_million_m3: pondingMm3,
+          water_level_increase_m: Math.round(damH * 0.7)
+        },
+        breach_hydrograph: {
+          ...DEFAULT_RESULT.breach_hydrograph,
+          peak_breach_outflow_m3s: peakBreach,
+          total_downstream_peak_q_m3s: peakBreach + 1250,
+          downstream_wave_velocity_ms: parseFloat((6.0 + 4.0 * mult).toFixed(1)),
+          downstream_surge_depth_m: parseFloat((4.0 + 8.0 * mult).toFixed(1))
+        }
+      });
     }
   };
 

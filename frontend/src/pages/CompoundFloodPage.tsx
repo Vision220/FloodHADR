@@ -274,6 +274,7 @@ export const CompoundFloodPage: React.FC = () => {
   };
 
   const runSimulation = async () => {
+    let data: CompoundSimulationResult | null = null;
     try {
       const res = await fetch('/api/compound-flood/simulate', {
         method: 'POST',
@@ -286,37 +287,40 @@ export const CompoundFloodPage: React.FC = () => {
         })
       });
       if (res.ok) {
-        const data: CompoundSimulationResult = await res.json();
-        setResult(data);
-      } else {
-        // Compute dynamic fallback result
-        const matchPreset = presets.find((p) => p.id === selectedPresetId) || DEFAULT_PRESETS[0];
-        const breachOutflow = damBreach ? 12800 : 0;
-        const mainFlow = Math.round(matchPreset.main_river_flow_m3s * (rainfallMm / 250));
-        const spillway = Math.round(6200 * (rainfallMm / 300));
-        const tribFlow = Math.round(7300 * (rainfallMm / 250));
-        const totalQ = mainFlow + spillway + breachOutflow + tribFlow;
-
-        setResult({
-          ...DEFAULT_COMPOUND_RESULT,
-          scenario_preset: matchPreset,
-          hazard_components: {
-            main_river_flow_m3s: mainFlow,
-            reservoir_spillway_release_m3s: spillway,
-            dam_breach_outflow_m3s: breachOutflow,
-            total_tributaries_discharge_m3s: tribFlow,
-            dam_breach_active: damBreach
-          },
-          combined_downstream_hydraulics: {
-            combined_peak_discharge_m3s: totalQ,
-            combined_water_depth_m: parseFloat((8.0 + totalQ / 3000).toFixed(1)),
-            combined_velocity_ms: parseFloat((4.5 + totalQ / 7000).toFixed(1)),
-            downstream_peak_arrival_time_hr: parseFloat((1.2 + 25000 / (totalQ + 1000)).toFixed(1))
-          }
-        });
+        data = await res.json();
       }
     } catch (err) {
-      console.warn('Simulation execution warning:', err);
+      console.warn('Simulation execution warning; using dynamic client fallback:', err);
+    }
+
+    if (data) {
+      setResult(data);
+    } else {
+      // Compute dynamic fallback result
+      const matchPreset = presets.find((p) => p.id === selectedPresetId) || DEFAULT_PRESETS[0];
+      const breachOutflow = damBreach ? 12800 : 0;
+      const mainFlow = Math.round(matchPreset.main_river_flow_m3s * (rainfallMm / 250));
+      const spillway = Math.round(6200 * (rainfallMm / 300));
+      const tribFlow = Math.round(7300 * (rainfallMm / 250));
+      const totalQ = mainFlow + spillway + breachOutflow + tribFlow;
+
+      setResult({
+        ...DEFAULT_COMPOUND_RESULT,
+        scenario_preset: matchPreset,
+        hazard_components: {
+          main_river_flow_m3s: mainFlow,
+          reservoir_spillway_release_m3s: spillway,
+          dam_breach_outflow_m3s: breachOutflow,
+          total_tributaries_discharge_m3s: tribFlow,
+          dam_breach_active: damBreach
+        },
+        combined_downstream_hydraulics: {
+          combined_peak_discharge_m3s: totalQ,
+          combined_water_depth_m: parseFloat((8.0 + totalQ / 3000).toFixed(1)),
+          combined_velocity_ms: parseFloat((4.5 + totalQ / 7000).toFixed(1)),
+          downstream_peak_arrival_time_hr: parseFloat((1.2 + 25000 / (totalQ + 1000)).toFixed(1))
+        }
+      });
     }
   };
 

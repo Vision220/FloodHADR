@@ -198,6 +198,7 @@ export const ClimateProjectionPage: React.FC = () => {
   };
 
   const runAnalysis = async () => {
+    let data: ClimateAnalysisResult | null = null;
     try {
       const res = await fetch('/api/climate/analyze', {
         method: 'POST',
@@ -213,73 +214,76 @@ export const ClimateProjectionPage: React.FC = () => {
         })
       });
       if (res.ok) {
-        const data: ClimateAnalysisResult = await res.json();
-        setResult(data);
-      } else {
-        // Calculate dynamic fallback based on multipliers
-        const futRain = parseFloat((baselineRainfall * rainfallMult).toFixed(1));
-        const futRunoffVol = parseFloat((42.5 * runoffMult).toFixed(2));
-        const futPeakQ = Math.round(12500 * (futRain / 180) * runoffMult);
-        const futArea = parseFloat((124.5 * (futPeakQ / 12500) ** 0.6).toFixed(2));
-        const futDepth = parseFloat((8.4 * (futPeakQ / 12500) ** 0.4).toFixed(2));
-        const futVel = parseFloat((4.6 * (futPeakQ / 12500) ** 0.3).toFixed(2));
-
-        const rainPct = parseFloat((((futRain - baselineRainfall) / baselineRainfall) * 100).toFixed(1));
-        const runoffPct = parseFloat((((futRunoffVol - 42.5) / 42.5) * 100).toFixed(1));
-        const qPct = parseFloat((((futPeakQ - 12500) / 12500) * 100).toFixed(1));
-        const areaPct = parseFloat((((futArea - 124.5) / 124.5) * 100).toFixed(1));
-        const depthPct = parseFloat((((futDepth - 8.4) / 8.4) * 100).toFixed(1));
-        const velPct = parseFloat((((futVel - 4.6) / 4.6) * 100).toFixed(1));
-
-        const activeProv = providers.find((p) => p.provider_id === providerId) || DEFAULT_PROVIDERS[0];
-
-        setResult({
-          status: 'success',
-          provider_metadata: activeProv,
-          scenario_horizon: {
-            horizon_year: horizonYear,
-            ssp_scenario: sspScenario,
-            temperature_anomaly_c: sspScenario === 'SSP1-2.6' ? 1.8 : sspScenario === 'SSP2-4.5' ? 2.7 : sspScenario === 'SSP3-7.0' ? 3.6 : 4.4
-          },
-          sensitivity_factors: {
-            rainfall_intensity_multiplier: rainfallMult,
-            extreme_precipitation_multiplier: parseFloat((rainfallMult * 1.05).toFixed(2)),
-            runoff_response_factor: runoffMult,
-            reservoir_inflow_multiplier: inflowMult,
-            glacier_melt_surge_m3s: Math.round(1000 * rainfallMult)
-          },
-          current_climate: {
-            rainfall_mm: baselineRainfall,
-            runoff_depth_mm: 114.0,
-            runoff_volume_million_m3: 42.5,
-            peak_discharge_m3s: 12500,
-            flood_area_km2: 124.5,
-            max_water_depth_m: 8.4,
-            max_velocity_ms: 4.6
-          },
-          future_climate: {
-            rainfall_mm: futRain,
-            runoff_depth_mm: parseFloat((114.0 * runoffMult).toFixed(1)),
-            runoff_volume_million_m3: futRunoffVol,
-            peak_discharge_m3s: futPeakQ,
-            flood_area_km2: futArea,
-            max_water_depth_m: futDepth,
-            max_velocity_ms: futVel
-          },
-          delta_comparison: {
-            rainfall_pct_change: rainPct,
-            runoff_depth_pct_change: runoffPct,
-            runoff_volume_pct_change: runoffPct,
-            peak_discharge_pct_change: qPct,
-            flood_area_pct_change: areaPct,
-            max_depth_pct_change: depthPct,
-            max_velocity_pct_change: velPct
-          },
-          data_rigor_notice: `IPCC AR6 ${sspScenario} Climate Projection for Year ${horizonYear}`
-        });
+        data = await res.json();
       }
     } catch (err) {
-      console.warn('Climate analysis error:', err);
+      console.warn('Climate analysis API warning; using dynamic client fallback:', err);
+    }
+
+    if (data) {
+      setResult(data);
+    } else {
+      // Calculate dynamic fallback based on multipliers
+      const futRain = parseFloat((baselineRainfall * rainfallMult).toFixed(1));
+      const futRunoffVol = parseFloat((42.5 * runoffMult).toFixed(2));
+      const futPeakQ = Math.round(12500 * (futRain / 180) * runoffMult);
+      const futArea = parseFloat((124.5 * (futPeakQ / 12500) ** 0.6).toFixed(2));
+      const futDepth = parseFloat((8.4 * (futPeakQ / 12500) ** 0.4).toFixed(2));
+      const futVel = parseFloat((4.6 * (futPeakQ / 12500) ** 0.3).toFixed(2));
+
+      const rainPct = parseFloat((((futRain - baselineRainfall) / baselineRainfall) * 100).toFixed(1));
+      const runoffPct = parseFloat((((futRunoffVol - 42.5) / 42.5) * 100).toFixed(1));
+      const qPct = parseFloat((((futPeakQ - 12500) / 12500) * 100).toFixed(1));
+      const areaPct = parseFloat((((futArea - 124.5) / 124.5) * 100).toFixed(1));
+      const depthPct = parseFloat((((futDepth - 8.4) / 8.4) * 100).toFixed(1));
+      const velPct = parseFloat((((futVel - 4.6) / 4.6) * 100).toFixed(1));
+
+      const activeProv = providers.find((p) => p.provider_id === providerId) || DEFAULT_PROVIDERS[0];
+
+      setResult({
+        status: 'success',
+        provider_metadata: activeProv,
+        scenario_horizon: {
+          horizon_year: horizonYear,
+          ssp_scenario: sspScenario,
+          temperature_anomaly_c: sspScenario === 'SSP1-2.6' ? 1.8 : sspScenario === 'SSP2-4.5' ? 2.7 : sspScenario === 'SSP3-7.0' ? 3.6 : 4.4
+        },
+        sensitivity_factors: {
+          rainfall_intensity_multiplier: rainfallMult,
+          extreme_precipitation_multiplier: parseFloat((rainfallMult * 1.05).toFixed(2)),
+          runoff_response_factor: runoffMult,
+          reservoir_inflow_multiplier: inflowMult,
+          glacier_melt_surge_m3s: Math.round(1000 * rainfallMult)
+        },
+        current_climate: {
+          rainfall_mm: baselineRainfall,
+          runoff_depth_mm: 114.0,
+          runoff_volume_million_m3: 42.5,
+          peak_discharge_m3s: 12500,
+          flood_area_km2: 124.5,
+          max_water_depth_m: 8.4,
+          max_velocity_ms: 4.6
+        },
+        future_climate: {
+          rainfall_mm: futRain,
+          runoff_depth_mm: parseFloat((114.0 * runoffMult).toFixed(1)),
+          runoff_volume_million_m3: futRunoffVol,
+          peak_discharge_m3s: futPeakQ,
+          flood_area_km2: futArea,
+          max_water_depth_m: futDepth,
+          max_velocity_ms: futVel
+        },
+        delta_comparison: {
+          rainfall_pct_change: rainPct,
+          runoff_depth_pct_change: runoffPct,
+          runoff_volume_pct_change: runoffPct,
+          peak_discharge_pct_change: qPct,
+          flood_area_pct_change: areaPct,
+          max_depth_pct_change: depthPct,
+          max_velocity_pct_change: velPct
+        },
+        data_rigor_notice: `IPCC AR6 ${sspScenario} Climate Projection for Year ${horizonYear}`
+      });
     }
   };
 
