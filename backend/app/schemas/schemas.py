@@ -191,9 +191,20 @@ class ImpactAnalysisResponse(BaseModel):
 # DEM Schemas
 class DEMMetadataResponse(BaseModel):
     id: str
+    terrain_id: Optional[str] = None
     filename: str
+    source: Optional[str] = "Bhuvan / NRSC ALOS PALSAR 12.5m DEM"
+    source_url: Optional[str] = "https://bhuvan.nrsc.gov.in"
     crs: str
     resolution: str
+    horizontal_resolution: Optional[str] = None
+    vertical_units: Optional[str] = "meters"
+    vertical_datum: Optional[str] = "EGM96 / MSL"
+    nodata: Optional[float] = -9999.0
+    bounding_box: Optional[List[float]] = None
+    checksum: Optional[str] = None
+    provenance: Optional[str] = "REAL"
+    status: Optional[str] = "VERIFIED"
     width: int
     height: int
     min_elevation: float
@@ -214,4 +225,13 @@ class DEMPreviewResponse(BaseModel):
     downsampled_cols: int
     elevation_cells: List[Dict[str, Any]]
     geojson_boundary: Dict[str, Any]
+
+
+from app.schemas.domain_schemas import (
+    ScenarioMetadata,
+    ModelMetadata,
+    SimulationFrame,
+    SimulationRun,
+)
+
 

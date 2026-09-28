@@ -259,25 +259,79 @@ export const DamBreakScenarioPage: React.FC = () => {
         </div>
       )}
 
-      {/* Preset Scenario Selector Buttons */}
-      <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-subtle">
-        <span className="text-xs font-bold text-slate-800 uppercase tracking-wider block mb-2">
-          Quick Preset Scenario Templates:
-        </span>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          {(['Sudden dam break', 'Gradual dam break', 'Controlled water release', 'River blockage release'] as BreachTypeOption[]).map((type) => (
+      {/* Phase 35 Rule Banner: PMF != Dam Break */}
+      <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-xl text-slate-100 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+        <div className="flex items-start space-x-3">
+          <div className="p-2 bg-amber-500/20 text-amber-400 rounded-lg border border-amber-500/40 shrink-0">
+            <Info className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="flex items-center space-x-2">
+              <span className="text-xs font-black uppercase tracking-wider text-amber-400 font-mono">
+                PHASE 35 AUTHORITATIVE RULE ENFORCEMENT
+              </span>
+              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-950 text-cyan-300 border border-cyan-800">
+                PMF ≠ DAM BREAK
+              </span>
+            </div>
+            <p className="text-xs text-slate-300 font-mono mt-0.5">
+              A Probable Maximum Flood (PMF) routing scenario does NOT automatically imply a dam failure. Dam breach occurrence, initial storage, spillway operation, and formation time are explicitly defined per scenario.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Phase 35 Tehri Preset Scenario Selector Buttons */}
+      <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-subtle space-y-3">
+        <div className="flex justify-between items-center">
+          <span className="text-xs font-extrabold text-slate-900 uppercase tracking-wider block font-mono">
+            Phase 35 Authoritative Tehri Scenario Selection:
+          </span>
+          <span className="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-300 font-bold">
+            7 CATEGORIZED SCENARIOS
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+          {[
+            { id: 'TEHRI_PMF_NO_FAILURE', name: 'TEHRI PMF NO FAILURE', cat: 'PMF (No Failure)', breach: false, level: 839.5, storage: 3550 },
+            { id: 'TEHRI_PMF_OVERTOPPING_FAILURE_SCENARIO', name: 'TEHRI PMF OVERTOPPING FAILURE', cat: 'Overtopping Breach', breach: true, level: 839.5, storage: 3550 },
+            { id: 'TEHRI_FRL_BREACH', name: 'TEHRI FRL BREACH', cat: 'FRL Structural Breach', breach: true, level: 830.0, storage: 3540 },
+            { id: 'TEHRI_MDDL_BREACH', name: 'TEHRI MDDL BREACH', cat: 'MDDL Low-Head Breach', breach: true, level: 740.0, storage: 2100 },
+            { id: 'TEHRI_SPILLWAY_OPERATION', name: 'TEHRI SPILLWAY OPERATION', cat: 'Spillway Release', breach: false, level: 832.0, storage: 3540 },
+            { id: 'TEHRI_EXTREME_INFLOW', name: 'TEHRI EXTREME INFLOW', cat: 'Extreme Inflow Routing', breach: false, level: 835.0, storage: 3540 },
+            { id: 'USER_DEFINED', name: 'USER DEFINED', cat: 'Custom Parameters', breach: true, level: 820.0, storage: 3200 },
+          ].map((scen) => (
             <button
-              key={type}
+              key={scen.id}
               type="button"
-              onClick={() => loadPreset(type)}
-              className={`p-2.5 rounded-lg border text-left text-xs transition-all ${
-                formState.breachType === type
-                  ? 'border-sky-600 bg-sky-50 font-bold text-sky-900 shadow-sm'
-                  : 'border-slate-200 hover:bg-slate-50 text-slate-700 font-medium'
+              onClick={() => {
+                setFormState({
+                  ...defaultFormState,
+                  scenarioTitle: scen.name,
+                  reservoirElevationM: scen.level,
+                  storageVolumeMm3: scen.storage,
+                  breachWidthM: scen.breach ? 180 : 0,
+                  finalBreachWidthM: scen.breach ? 220 : 0,
+                  breachType: scen.breach ? 'Gradual dam break' : 'Controlled water release',
+                });
+              }}
+              className={`p-3 rounded-xl border text-left text-xs transition-all font-mono ${
+                formState.scenarioTitle === scen.name
+                  ? 'border-sky-600 bg-sky-50 shadow-md ring-2 ring-sky-500/20'
+                  : 'border-slate-200 hover:bg-slate-50 text-slate-800'
               }`}
             >
-              <div className="text-[10px] text-slate-500 uppercase font-bold mb-0.5">Preset Option</div>
-              <div>{type}</div>
+              <div className="flex justify-between items-center mb-1">
+                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
+                  scen.breach ? 'bg-rose-100 text-rose-800 border border-rose-300' : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                }`}>
+                  {scen.breach ? 'BREACH ACTIVE' : 'NO BREACH'}
+                </span>
+                <span className="text-[9px] text-slate-500 font-bold">{scen.level}m</span>
+              </div>
+              <div className="font-extrabold text-slate-900 truncate">{scen.name}</div>
+              <div className="text-[10px] text-slate-500 mt-0.5">{scen.cat}</div>
             </button>
           ))}
         </div>

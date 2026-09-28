@@ -82,15 +82,15 @@ export const sampleDamGeoJSON: FeatureCollection<Point> = {
   ],
 };
 
-// 4. Flood Inundation Classified Depth Polygons GeoJSON
+// 4. Flood Inundation Classified Depth Polygons GeoJSON (Strictly along Bhagirathi River Corridor)
 export const sampleFloodDepthGeoJSON: FeatureCollection<Polygon> = {
   type: 'FeatureCollection',
   features: [
-    // Zone 1: Severe Inundation Depth (> 3.0 m)
+    // Zone 1: Severe Inundation Depth (> 3.0 m) - Dam Toe to Koteshwar
     {
       type: 'Feature',
       properties: {
-        zoneName: 'Severe Hydrodynamic Breach Zone',
+        zoneName: 'Severe Hydrodynamic Breach Zone (Dam Toe - Koteshwar)',
         depthM: 14.6,
         velocityMs: 8.4,
         arrivalTimeHr: 0.2,
@@ -101,21 +101,21 @@ export const sampleFloodDepthGeoJSON: FeatureCollection<Polygon> = {
         type: 'Polygon',
         coordinates: [
           [
-            [78.4802, 30.3781],
-            [78.4900, 30.3400],
-            [78.5100, 30.2600],
-            [78.4800, 30.2500],
-            [78.4600, 30.3300],
+            [78.4802, 30.3781], // Tehri Dam
+            [78.4870, 30.3450],
+            [78.4980, 30.2780], // Koteshwar
+            [78.4780, 30.2750],
+            [78.4650, 30.3400],
             [78.4802, 30.3781],
           ],
         ],
       },
     },
-    // Zone 2: High Risk Depth (1.5 - 3.0 m)
+    // Zone 2: High Risk Depth (1.5 - 3.0 m) - Koteshwar to Devprayag Confluence
     {
       type: 'Feature',
       properties: {
-        zoneName: 'Devprayag Valley High Water Zone',
+        zoneName: 'Devprayag Valley High Water Zone (Koteshwar - Devprayag)',
         depthM: 2.8,
         velocityMs: 5.2,
         arrivalTimeHr: 1.1,
@@ -126,20 +126,22 @@ export const sampleFloodDepthGeoJSON: FeatureCollection<Polygon> = {
         type: 'Polygon',
         coordinates: [
           [
-            [78.5100, 30.2600],
-            [78.6100, 30.1500],
-            [78.5700, 30.1300],
-            [78.4800, 30.2500],
-            [78.5100, 30.2600],
+            [78.4980, 30.2780], // Koteshwar
+            [78.5300, 30.2100],
+            [78.5986, 30.1458], // Devprayag Confluence
+            [78.5800, 30.1350],
+            [78.5100, 30.2000],
+            [78.4780, 30.2750],
+            [78.4980, 30.2780],
           ],
         ],
       },
     },
-    // Zone 3: Moderate Flood Depth (0.5 - 1.5 m)
+    // Zone 3: Moderate Flood Depth (0.5 - 1.5 m) - Devprayag downstream to Shivpuri & Rishikesh
     {
       type: 'Feature',
       properties: {
-        zoneName: 'Shivpuri - Rishikesh Surge Zone',
+        zoneName: 'Shivpuri - Rishikesh Surge Zone (Devprayag - Rishikesh Reach)',
         depthM: 1.2,
         velocityMs: 3.4,
         arrivalTimeHr: 2.5,
@@ -150,22 +152,23 @@ export const sampleFloodDepthGeoJSON: FeatureCollection<Polygon> = {
         type: 'Polygon',
         coordinates: [
           [
-            [78.6100, 30.1500],
-            [78.4200, 30.1400],
-            [78.3000, 30.1000],
-            [78.2800, 30.0800],
-            [78.3500, 30.1200],
-            [78.5700, 30.1300],
-            [78.6100, 30.1500],
+            [78.5986, 30.1458], // Devprayag Confluence
+            [78.4800, 30.1420],
+            [78.3880, 30.1380], // Shivpuri
+            [78.2950, 30.1050], // Rishikesh
+            [78.2800, 30.0850],
+            [78.3750, 30.1200],
+            [78.5800, 30.1350],
+            [78.5986, 30.1458],
           ],
         ],
       },
     },
-    // Zone 4: Low Risk Inundation Fringe (< 0.5 m)
+    // Zone 4: Low Risk Inundation Fringe (< 0.5 m) - Rishikesh to Haridwar
     {
       type: 'Feature',
       properties: {
-        zoneName: 'Outer Floodplain Fringe Zone',
+        zoneName: 'Outer Floodplain Fringe Zone (Rishikesh - Haridwar Reach)',
         depthM: 0.35,
         velocityMs: 1.1,
         arrivalTimeHr: 4.8,
@@ -176,13 +179,13 @@ export const sampleFloodDepthGeoJSON: FeatureCollection<Polygon> = {
         type: 'Polygon',
         coordinates: [
           [
-            [78.3000, 30.1000],
-            [78.2500, 30.0400],
-            [78.2000, 29.9800],
-            [78.1800, 29.9600],
-            [78.2200, 29.9800],
-            [78.2800, 30.0800],
-            [78.3000, 30.1000],
+            [78.2950, 30.1050], // Rishikesh
+            [78.2400, 30.0400],
+            [78.1600, 29.9500], // Haridwar
+            [78.1350, 29.9450],
+            [78.2200, 30.0350],
+            [78.2800, 30.0850],
+            [78.2950, 30.1050],
           ],
         ],
       },
@@ -190,29 +193,29 @@ export const sampleFloodDepthGeoJSON: FeatureCollection<Polygon> = {
   ],
 };
 
-// 5. Flood Wave Velocity Vectors GeoJSON
+// 5. Flood Wave Velocity Vectors GeoJSON (Strictly along Bhagirathi River Channel)
 export const sampleVelocityVectorsGeoJSON: FeatureCollection<LineString> = {
   type: 'FeatureCollection',
   features: [
     {
       type: 'Feature',
-      properties: { velocityMs: 8.4, direction: 'SSW 210°' },
-      geometry: { type: 'LineString', coordinates: [[78.4802, 30.3781], [78.4900, 30.3400]] },
+      properties: { velocityMs: 8.4, direction: 'SSE 170°' },
+      geometry: { type: 'LineString', coordinates: [[78.4802, 30.3781], [78.4980, 30.2780]] },
     },
     {
       type: 'Feature',
-      properties: { velocityMs: 6.8, direction: 'SW 225°' },
-      geometry: { type: 'LineString', coordinates: [[78.4900, 30.3400], [78.5100, 30.2600]] },
+      properties: { velocityMs: 6.8, direction: 'SE 135°' },
+      geometry: { type: 'LineString', coordinates: [[78.4980, 30.2780], [78.5986, 30.1458]] },
     },
     {
       type: 'Feature',
-      properties: { velocityMs: 5.2, direction: 'SE 140°' },
-      geometry: { type: 'LineString', coordinates: [[78.5100, 30.2600], [78.5986, 30.1458]] },
+      properties: { velocityMs: 5.2, direction: 'WSW 250°' },
+      geometry: { type: 'LineString', coordinates: [[78.5986, 30.1458], [78.3880, 30.1380]] },
     },
     {
       type: 'Feature',
-      properties: { velocityMs: 3.4, direction: 'WSW 245°' },
-      geometry: { type: 'LineString', coordinates: [[78.5986, 30.1458], [78.2950, 30.1050]] },
+      properties: { velocityMs: 3.4, direction: 'SW 225°' },
+      geometry: { type: 'LineString', coordinates: [[78.3880, 30.1380], [78.2950, 30.1050]] },
     },
   ],
 };

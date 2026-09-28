@@ -1,0 +1,9 @@
+Plan Title=Tehri 2D Unsteady Dam Break Plan
+Short Identifier=p01
+Simulation Date=28Sep2026 00:00,28Sep2026 08:00
+Computation Interval=2SEC
+Mapping Interval=15MIN
+2D Equations=Full 2D Shallow Water Equations (SWE)
+2D Matrix Solver=Direct
+2D Max Iterations=20
+2D Convergence Tolerance=0.003

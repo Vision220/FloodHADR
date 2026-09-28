@@ -76,11 +76,29 @@ class GEEAuth:
     @classmethod
     def get_status(cls) -> dict:
         auth_status, msg = cls.initialize()
+        
+        if auth_status:
+            execution_state = "LIVE"
+        elif "missing" in msg.lower() or "not configured" in msg.lower():
+            execution_state = "NOT CONFIGURED"
+        elif "error" in msg.lower() or "failed" in msg.lower():
+            execution_state = "ERROR"
+        else:
+            execution_state = "DEMO"
+
         return {
-            "enabled": True,
+            "execution_state": execution_state,
+            "gee_execution_state": execution_state,
             "authenticated": auth_status,
-            "project": cls._project_id or (GEEConfig.PROJECT_ID or "Not Configured"),
-            "service": "Google Earth Engine Data Catalog",
+            "project": cls._project_id or (GEEConfig.PROJECT_ID or "NOT_CONFIGURED"),
+            "service": "Google Earth Engine Remote Sensing Catalog",
             "message": msg,
-            "mode": "REAL_GEE_AUTHENTICATED" if auth_status else "DEMO_DATA_MODE"
+            "mode": "REAL_GEE_AUTHENTICATED" if auth_status else "DEMO_DATA_MODE",
+            "separated_roles": {
+                "A_hydrodynamic_simulation": "EXPLICITLY_DISABLED_IN_GEE (Main dam-break hydraulic solution solved exclusively by 2D finite-volume SWE/DWE solver)",
+                "B_satellite_observation": "Sentinel-1 SAR & Sentinel-2 Optical Remote Sensing",
+                "C_rainfall_remote_sensing": "CHIRPS Daily Satellite Precipitation Time-Series",
+                "D_land_cover": "ESA WorldCover & Sentinel-2 NDVI Vegetation Index",
+                "E_flood_extent_validation": "3-Way Spatial Comparison (GEE SAR vs FloodHADR vs HEC-RAS)"
+            }
         }

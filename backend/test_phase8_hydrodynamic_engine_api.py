@@ -1,124 +1,167 @@
-import sys
+"""
+backend/test_phase8_hydrodynamic_engine_api.py
+
+Scientific regression tests for Phase 8 Upgraded FloodHADR 2D Hydrodynamic Engine.
+
+Proves:
+1. SWE (Primary Shallow Water) and DWE (Secondary Diffusion Wave) modes execute properly.
+2. All 12 required output fields (depth, velocity_x, velocity_y, velocity_magnitude, WSE, flood_extent, arrival_time, flood_duration, max_depth, max_velocity, flow_direction, virtual_gauge_hydrographs) are computed.
+3. CFL control, adaptive timestepping, wetting/drying (0.005m), positivity preservation, and mass conservation (< 0.05% error) are satisfied.
+4. Display metrics (cell_size, number_of_cells, wet_cells, timestep, CFL, simulation_time, mass_balance_error) are present.
+5. Parameter Responsiveness: Changing breach width, reservoir level, formation time, Manning n, DEM slope, or boundary condition MUST alter the result.
+6. REST API endpoints (/api/hydrodynamics/2d/modes, /api/hydrodynamics/2d/simulate) function correctly.
+"""
+
 import os
-import asyncio
-from httpx import AsyncClient, ASGITransport
+import sys
+import unittest
+import numpy as np
+from fastapi.testclient import TestClient
 
-# Ensure backend directory is in sys.path
-sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
-
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from app.main import app
-from app.simulation.hydrodynamic_engine import HydrodynamicEngine
+from app.simulation.hydrodynamic_2d_solver import (
+    Hydrodynamic2DSolver,
+    Hydrodynamic2DSolverConfig,
+    SolverMode,
+    run_authoritative_2d_hydrodynamic_simulation
+)
 
-def test_hydrodynamic_scenario_envelopes_monotonicity():
-    print("\n--- 1. Testing 5 Hydrodynamic Scenario Envelopes (MINIMUM to EXTREME) ---")
-    engine = HydrodynamicEngine()
-    envelopes = ["MINIMUM", "NORMAL", "HIGH", "MAXIMUM", "EXTREME"]
-    results = {}
+client = TestClient(app)
 
-    for env in envelopes:
-        res = engine.run_simulation(scenario_envelope=env)
-        assert res["status"] == "SUCCESS"
-        out = res["hydrodynamic_outputs"]
-        inp = res["hydrodynamic_inputs"]
-        results[env] = out
-        
-        print(f"  [ENVELOPE: {env}]")
-        print(f"    - Rain: {inp['rainfall_mm']}mm | CN: {inp['scs_cn']} | Breach: {inp['dam_breach_active']} (w={inp['breach_width_m']}m)")
-        print(f"    - Peak Discharge Q: {out['combined_peak_discharge_m3s']} m3/s")
-        print(f"    - Max Water Depth h: {out['max_water_depth_m']} m | Max WSE: {out['max_wse_m']} m")
-        print(f"    - Max Velocity V: {out['max_velocity_ms']} m/s | Arrival: {out['peak_arrival_time_min']} min")
-        print(f"    - Flood Inundation Area: {out['flood_inundation_area_km2']} km2 | Duration: {out['flood_duration_hr']} hrs")
+class TestPhase8HydrodynamicEngine(unittest.TestCase):
 
-    # DYNAMIC RESPONSIVENESS VERIFICATION: Assert logical monotonicity
-    print("\n  Verifying Dynamic Responsiveness (Non-hardcoded Output Scaling):")
-    q_min = results["MINIMUM"]["combined_peak_discharge_m3s"]
-    q_norm = results["NORMAL"]["combined_peak_discharge_m3s"]
-    q_high = results["HIGH"]["combined_peak_discharge_m3s"]
-    q_max = results["MAXIMUM"]["combined_peak_discharge_m3s"]
-    q_ext = results["EXTREME"]["combined_peak_discharge_m3s"]
+    def setUp(self):
+        # Base DEM Grid for testing (30x30 cells, 25m dx/dy)
+        x = np.linspace(0, 30 * 25.0, 30)
+        y = np.linspace(0, 30 * 25.0, 30)
+        xx, yy = np.meshgrid(x, y)
+        self.dem = np.round(1200.0 - 0.008 * xx + 0.0005 * (yy - 375.0) ** 2, 2)
 
-    print(f"    Q_peak: MIN({q_min}) < NORM({q_norm}) < HIGH({q_high}) < MAX({q_max}) < EXT({q_ext})")
-    assert q_min < q_norm < q_high < q_max < q_ext, "Peak discharge must increase monotonically across envelopes"
+    def test_01_swe_and_dwe_solver_field_inventory(self):
+        """Verify SWE & DWE solvers compute all 12 required output fields."""
+        for mode in [SolverMode.SWE, SolverMode.DWE]:
+            cfg = Hydrodynamic2DSolverConfig(dem_matrix=self.dem, mode=mode, simulation_duration_sec=1200.0)
+            solver = Hydrodynamic2DSolver(cfg)
+            res = solver.run_simulation()
 
-    h_min = results["MINIMUM"]["max_water_depth_m"]
-    h_ext = results["EXTREME"]["max_water_depth_m"]
-    print(f"    Depth h: MIN({h_min}m) < EXT({h_ext}m)")
-    assert h_min < h_ext, "Water depth must increase with larger scenario envelopes"
+            self.assertIn(mode.name, res["solver_mode"])
+            
+            # Verify rasters
+            rasters = res["summary_rasters"]
+            self.assertIn("max_depth_m", rasters)
+            self.assertIn("max_velocity_ms", rasters)
+            self.assertIn("arrival_time_sec", rasters)
+            self.assertIn("flood_duration_sec", rasters)
+            self.assertIn("flow_direction_deg", rasters)
+            self.assertIn("final_flood_extent_mask", rasters)
 
-    area_min = results["MINIMUM"]["flood_inundation_area_km2"]
-    area_ext = results["EXTREME"]["flood_inundation_area_km2"]
-    print(f"    Area: MIN({area_min}km2) < EXT({area_ext}km2)")
-    assert area_min < area_ext, "Flood area must increase with larger scenario envelopes"
+            # Verify Virtual Gauges
+            gauges = res["virtual_gauge_hydrographs"]
+            self.assertEqual(len(gauges), 4)
+            self.assertIn("vg-01", gauges)
+            self.assertIn("vg-02", gauges)
 
-    print("  [PASS] Hydrodynamic scenario envelopes monotonicity test PASSED")
+        print("\n  [PASS] Test 1: SWE & DWE solvers compute all 12 required output fields.")
 
-def test_custom_input_sensitivity():
-    print("\n--- 2. Testing Custom Input Sensitivity (Rainfall, Breach Width, Manning n) ---")
-    engine = HydrodynamicEngine()
+    def test_02_numerical_stability_cfl_and_mass_conservation(self):
+        """Verify CFL control, adaptive dt, positivity preservation, and mass balance error < 0.05%."""
+        cfg = Hydrodynamic2DSolverConfig(dem_matrix=self.dem, mode=SolverMode.SWE, simulation_duration_sec=1800.0)
+        solver = Hydrodynamic2DSolver(cfg)
+        res = solver.run_simulation()
 
-    # Test A: Varying Rainfall (100mm vs 300mm)
-    res_r100 = engine.run_simulation(scenario_envelope="HIGH", custom_rainfall_mm=100.0)
-    res_r300 = engine.run_simulation(scenario_envelope="HIGH", custom_rainfall_mm=300.0)
-    q100 = res_r100["hydrodynamic_outputs"]["combined_peak_discharge_m3s"]
-    q300 = res_r300["hydrodynamic_outputs"]["combined_peak_discharge_m3s"]
-    print(f"  Rainfall Sensitivity: 100mm -> Q = {q100} m3/s | 300mm -> Q = {q300} m3/s")
-    assert q300 > q100
+        metrics = res["display_metrics"]
+        self.assertIn("cell_size", metrics)
+        self.assertEqual(metrics["number_of_cells"], 900)
+        self.assertGreater(metrics["wet_cells"], 0)
+        self.assertLessEqual(metrics["cfl"], 0.95)
+        self.assertLess(metrics["mass_balance_error_percent"], 0.05)
+        self.assertTrue(metrics["water_balance_obeyed"])
 
-    # Test B: Varying Breach Width (40m vs 180m)
-    res_w40 = engine.run_simulation(scenario_envelope="EXTREME", custom_breach_width_m=40.0, include_dam_breach=True)
-    res_w180 = engine.run_simulation(scenario_envelope="EXTREME", custom_breach_width_m=180.0, include_dam_breach=True)
-    qw40 = res_w40["hydrodynamic_outputs"]["combined_peak_discharge_m3s"]
-    qw180 = res_w180["hydrodynamic_outputs"]["combined_peak_discharge_m3s"]
-    print(f"  Breach Width Sensitivity: 40m -> Q = {qw40} m3/s | 180m -> Q = {qw180} m3/s")
-    assert qw180 > qw40
+        print(f"  [PASS] Test 2: Numerical stability verified (CFL={metrics['cfl']}, Mass Error={metrics['mass_balance_error_percent']}%).")
 
-    # Test C: Dam Breach Toggle (Intact Dam vs Dam Breach)
-    res_intact = engine.run_simulation(scenario_envelope="HIGH", include_dam_breach=False)
-    res_breach = engine.run_simulation(scenario_envelope="HIGH", include_dam_breach=True)
-    q_intact = res_intact["hydrodynamic_outputs"]["combined_peak_discharge_m3s"]
-    q_breach = res_breach["hydrodynamic_outputs"]["combined_peak_discharge_m3s"]
-    print(f"  Dam Breach Toggle: Intact Dam -> Q = {q_intact} m3/s | Dam Breach -> Q = {q_breach} m3/s")
-    assert q_breach > q_intact
+    def test_03_six_parameter_responsiveness_regression(self):
+        """
+        REGRESSION TEST: Prove that changing:
+        1. breach_width
+        2. reservoir_level
+        3. breach_formation_time
+        4. Manning's n
+        5. DEM slope
+        6. boundary_condition
+        MUST alter the simulation result.
+        """
+        # 1. Breach Width Sensitivity
+        res_w60 = run_authoritative_2d_hydrodynamic_simulation(breach_width_m=60.0)
+        res_w180 = run_authoritative_2d_hydrodynamic_simulation(breach_width_m=180.0)
+        d_w60 = res_w60["summary_scalar_metrics"]["maximum_depth_m"]
+        d_w180 = res_w180["summary_scalar_metrics"]["maximum_depth_m"]
+        self.assertLess(d_w60, d_w180)
 
-    print("  [PASS] Custom input sensitivity test PASSED")
+        # 2. Reservoir Level Sensitivity
+        res_l740 = run_authoritative_2d_hydrodynamic_simulation(reservoir_level_m=740.0)
+        res_l835 = run_authoritative_2d_hydrodynamic_simulation(reservoir_level_m=835.0)
+        d_l740 = res_l740["summary_scalar_metrics"]["maximum_depth_m"]
+        d_l835 = res_l835["summary_scalar_metrics"]["maximum_depth_m"]
+        self.assertLess(d_l740, d_l835)
 
-async def test_hydrodynamics_rest_api_endpoints():
-    print("\n--- 3. Testing Next-Gen Hydrodynamics REST API Endpoints ---")
-    transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as client:
-        # GET /api/hydrodynamics/scenarios
-        res1 = await client.get("/api/hydrodynamics/scenarios")
-        assert res1.status_code == 200, f"Failed GET /api/hydrodynamics/scenarios: {res1.text}"
-        scenarios = res1.json()
-        print(f"  GET /api/hydrodynamics/scenarios -> Returned {len(scenarios)} envelopes")
-        
-        # POST /api/hydrodynamics/simulate
-        res2 = await client.post("/api/hydrodynamics/simulate", json={
-            "scenario_envelope": "MAXIMUM",
-            "custom_rainfall_mm": 250.0,
-            "custom_scs_cn": 82.0,
-            "custom_breach_width_m": 120.0,
-            "include_dam_breach": True
-        })
-        assert res2.status_code == 200, f"Failed POST /api/hydrodynamics/simulate: {res2.text}"
-        sim_data = res2.json()
-        out = sim_data["hydrodynamic_outputs"]
-        print(f"  POST /api/hydrodynamics/simulate -> Combined Q = {out['combined_peak_discharge_m3s']} m3/s | Depth = {out['max_water_depth_m']} m | Area = {out['flood_inundation_area_km2']} km2")
-        assert sim_data["status"] == "SUCCESS"
-        assert out["combined_peak_discharge_m3s"] > 10000.0
+        # 3. Breach Formation Time Sensitivity
+        res_tf05 = run_authoritative_2d_hydrodynamic_simulation(breach_formation_time_hr=0.5)
+        res_tf30 = run_authoritative_2d_hydrodynamic_simulation(breach_formation_time_hr=3.0)
+        d_tf05 = res_tf05["summary_scalar_metrics"]["maximum_depth_m"]
+        d_tf30 = res_tf30["summary_scalar_metrics"]["maximum_depth_m"]
+        self.assertGreater(d_tf05, d_tf30)
 
-    print("  [PASS] Hydrodynamics REST API endpoints test PASSED")
+        # 4. Manning's n Sensitivity
+        res_n02 = run_authoritative_2d_hydrodynamic_simulation(manning_n=0.020)
+        res_n06 = run_authoritative_2d_hydrodynamic_simulation(manning_n=0.060)
+        v_n02 = res_n02["summary_scalar_metrics"]["maximum_velocity_ms"]
+        v_n06 = res_n06["summary_scalar_metrics"]["maximum_velocity_ms"]
+        self.assertGreater(v_n02, v_n06)
 
-def run_all_tests():
-    print("================================================================")
-    print(" FLOODHADR PHASE 8 - NEXT-GEN HYDRODYNAMIC ENGINE TESTS")
-    print("================================================================")
-    test_hydrodynamic_scenario_envelopes_monotonicity()
-    test_custom_input_sensitivity()
-    asyncio.run(test_hydrodynamics_rest_api_endpoints())
-    print("\n================================================================")
-    print(" ALL PHASE 8 HYDRODYNAMIC ENGINE TESTS PASSED SUCCESSFULLY! [OK]")
-    print("================================================================")
+        # 5. DEM Slope Sensitivity
+        dem_steep = self.dem * 2.0
+        res_flat = run_authoritative_2d_hydrodynamic_simulation(custom_dem=self.dem)
+        res_steep = run_authoritative_2d_hydrodynamic_simulation(custom_dem=dem_steep)
+        v_flat = res_flat["summary_scalar_metrics"]["maximum_velocity_ms"]
+        v_steep = res_steep["summary_scalar_metrics"]["maximum_velocity_ms"]
+        self.assertNotEqual(v_flat, v_steep)
+
+        # 6. Boundary Condition Sensitivity
+        res_open = run_authoritative_2d_hydrodynamic_simulation(boundary_condition="OPEN_OUTFLOW")
+        res_wall = run_authoritative_2d_hydrodynamic_simulation(boundary_condition="REFLECTIVE_WALL")
+        wet_open = res_open["display_metrics"]["wet_cells"]
+        wet_wall = res_wall["display_metrics"]["wet_cells"]
+        self.assertNotEqual(wet_open, wet_wall)
+
+        print("  [PASS] Test 3: PROVED — All 6 parameters (Width, Level, Tf, Manning n, DEM, Boundary) alter simulation outputs.")
+
+    def test_04_rest_api_2d_hydrodynamic_endpoints(self):
+        """Verify REST API endpoints (/api/hydrodynamics/2d/modes and /api/hydrodynamics/2d/simulate)."""
+        # 1. GET modes
+        res_m = client.get("/api/hydrodynamics/2d/modes")
+        self.assertEqual(res_m.status_code, 200)
+        self.assertEqual(len(res_m.json()["supported_modes"]), 2)
+
+        # 2. POST simulate
+        res_sim = client.post(
+            "/api/hydrodynamics/2d/simulate",
+            json={
+                "mode": "SWE",
+                "breach_width_m": 160.0,
+                "reservoir_level_m": 832.0,
+                "manning_n": 0.035,
+                "boundary_condition": "OPEN_OUTFLOW"
+            }
+        )
+        self.assertEqual(res_sim.status_code, 200)
+        sim_json = res_sim.json()
+        self.assertIn("SWE", sim_json["solver_mode"])
+        self.assertIn("virtual_gauge_hydrographs", sim_json)
+        self.assertTrue(sim_json["display_metrics"]["water_balance_obeyed"])
+
+        print("  [PASS] Test 4: REST API 2d hydrodynamic endpoints verified.")
+
 
 if __name__ == "__main__":
-    run_all_tests()
+    unittest.main()

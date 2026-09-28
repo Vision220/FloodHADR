@@ -95,6 +95,7 @@ export const Labels3D: React.FC<Labels3DProps> = ({
             }`}>
               <div className="flex items-center space-x-1 font-mono">
                 <span>{bldg.name}</span>
+                <span className="text-[8px] bg-amber-950 text-amber-300 px-1 rounded border border-amber-800">DEMO</span>
               </div>
               <div className="text-[8px] opacity-80 font-normal">
                 {isFlooded ? `[STATUS: ${bldg.type === 'Bridge' ? 'FLOOD IMPACT' : 'FLOOD AFFECTED'}]` : '[STATUS: NORMAL]'}

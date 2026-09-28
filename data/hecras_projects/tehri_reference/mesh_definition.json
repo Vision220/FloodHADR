@@ -1,0 +1,96 @@
+{
+  "preset": "MEDIUM",
+  "resolution_preset": "MEDIUM",
+  "dx_m": 25.0,
+  "dy_m": 25.0,
+  "recommended_timestep_s": 2.0,
+  "mesh_size": "25.0m \u00d7 25.0m (MEDIUM)",
+  "cell_size_x_m": 25.0,
+  "cell_size_y_m": 25.0,
+  "base_grid_rows": 30,
+  "base_grid_cols": 30,
+  "base_cell_count": 900,
+  "total_cell_count": 1188,
+  "cell_count": 1188,
+  "cell_area_m2": 625.0,
+  "breaklines_count": 3,
+  "refinement_regions_count": 2,
+  "breaklines": [
+    {
+      "name": "Bhagirathi_Main_Channel_Thalweg",
+      "description": "Main river centerline breakline enforcing cell face alignment along channel bed.",
+      "coordinates": [
+        [
+          0.0,
+          375.0
+        ],
+        [
+          375.0,
+          375.0
+        ],
+        [
+          750.0,
+          375.0
+        ]
+      ],
+      "enforce_cell_faces": true
+    },
+    {
+      "name": "Right_Canyon_Wall_Ridge",
+      "description": "Right valley steep slope breakline.",
+      "coordinates": [
+        [
+          0.0,
+          200.0
+        ],
+        [
+          750.0,
+          200.0
+        ]
+      ],
+      "enforce_cell_faces": true
+    },
+    {
+      "name": "Left_Canyon_Wall_Ridge",
+      "description": "Left valley slope boundary breakline.",
+      "coordinates": [
+        [
+          0.0,
+          550.0
+        ],
+        [
+          750.0,
+          550.0
+        ]
+      ],
+      "enforce_cell_faces": true
+    }
+  ],
+  "refinement_regions": [
+    {
+      "name": "Dam_Toe_High_Gradient_Zone",
+      "description": "Refinement zone near dam toe breach exit for steep wave front capture.",
+      "bounding_box": {
+        "min_x": 0.0,
+        "max_x": 150.0,
+        "min_y": 300.0,
+        "max_y": 450.0
+      },
+      "refinement_factor": 0.5
+    },
+    {
+      "name": "Koti_Nala_Confluence_Zone",
+      "description": "Refinement zone at Koti Nala tributary confluence.",
+      "bounding_box": {
+        "min_x": 300.0,
+        "max_x": 450.0,
+        "min_y": 250.0,
+        "max_y": 500.0
+      },
+      "refinement_factor": 0.5
+    }
+  ],
+  "trade_off_notice": "Mesh Option: MEDIUM (25.0m x 25.0m). SCIENTIFIC NOTICE: A finer mesh increases spatial discretization detail but does NOT automatically guarantee higher hydraulic accuracy. Finer grids require smaller computational timesteps under CFL stability rules, increase CPU runtime significantly, and can amplify localized numerical dispersion if bed roughness and topography gradients are under-resolved.",
+  "crs": "EPSG:32644",
+  "status": "HEC-RAS 2D MESH GENERATED"
+}

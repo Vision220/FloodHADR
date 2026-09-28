@@ -9,29 +9,119 @@ from app.rainfall import (
     compute_scs_runoff_hydrograph,
     adjust_cn_for_amc
 )
+from app.hydrology.hydrology_pipeline import (
+    HydrologicalSourceAgency,
+    HydrologyDataMode,
+    WeatherDataset,
+    run_authoritative_hydrology_pipeline
+)
 
 router = APIRouter(prefix="", tags=["Rainfall & SCS-CN Runoff Intelligence"])
 
 @router.get("/rainfall")
 async def get_rainfall(
-    provider_type: str = Query("DEMO", description="DEMO | HISTORICAL | FORECAST"),
+    provider_type: str = Query("DEMO", description="DEMO | HISTORICAL | FORECAST | IMD | CWC | THDC | WRIS | BHUVAN"),
+    mode: str = Query("OBSERVED", description="OBSERVED | HISTORICAL | CLIMATOLOGICAL | EXTREME | DESIGN | SCENARIO | USER_DEFINED"),
     catchment_id: str = Query("cat-bhagirathi-001"),
-    duration_hr: float = Query(24.0)
+    duration_hr: float = Query(24.0),
+    is_live: bool = Query(False)
 ):
     """
     Fetch rainfall time series, cumulative rainfall, intensity, duration, antecedent rainfall, and provider metadata.
-    Distinguishes OBSERVED, FORECAST, DEMO, and SYNTHETIC datasets.
+    Supports official agencies: IMD, CWC, THDC, India-WRIS, Bhuvan/NRSC across 7 data modes.
+    Explicitly tags DEMO DATA when live feeds are offline.
     """
-    provider_upper = provider_type.upper()
-    if provider_upper in ["HISTORICAL", "OBSERVED", "AWS"]:
-        provider = HistoricalRainfallProvider()
-    elif provider_upper in ["FORECAST", "NWP", "GFS"]:
-        provider = ForecastRainfallProvider()
-    else:
-        provider = DemoRainfallProvider()
+    pipeline_res = run_authoritative_hydrology_pipeline(
+        source_agency=provider_type,
+        mode=mode,
+        duration_hr=duration_hr,
+        is_live=is_live
+    )
+    return pipeline_res["weather_dataset"]
 
-    series_data = provider.get_rainfall_series(catchment_id=catchment_id, duration_hr=duration_hr)
-    return series_data
+
+@router.get("/rainfall/sources")
+async def get_rainfall_sources():
+    """
+    Returns registered authoritative hydrological data agencies and supported modes.
+    Agencies: IMD, CWC, THDC, India-WRIS, Bhuvan/NRSC.
+    Modes: OBSERVED, HISTORICAL, CLIMATOLOGICAL, EXTREME, DESIGN, SCENARIO, USER_DEFINED.
+    """
+    return {
+        "agencies": [
+            {
+                "agency_code": "IMD",
+                "agency_name": "India Meteorological Department (IMD)",
+                "dataset_types": ["Automatic Weather Station (AWS)", "Gridded Rainfall 0.25°", "Monsoon Outlook"],
+                "update_frequency": "Hourly",
+                "status": "DEMO DATA (Live API offline - using telemetry baseline archive)"
+            },
+            {
+                "agency_code": "CWC",
+                "agency_name": "Central Water Commission (CWC)",
+                "dataset_types": ["River Gauge Hydrograph", "Reservoir Storage Telemetry", "Flood Forecast"],
+                "update_frequency": "Hourly",
+                "status": "DEMO DATA (Live API offline - using historical telemetry archive)"
+            },
+            {
+                "agency_code": "THDC",
+                "agency_name": "THDC India Limited (Tehri Dam Control)",
+                "dataset_types": ["Tehri Dam Level", "Spillway Discharge", "Powerhouse Inflow"],
+                "update_frequency": "Real-time 15-min",
+                "status": "DEMO DATA (Live SCADA offline - using official THDC parameter database)"
+            },
+            {
+                "agency_code": "India-WRIS",
+                "agency_name": "Water Resources Information System (India-WRIS)",
+                "dataset_types": ["Basin Hydrology", "Sub-catchment Runoff", "Sensor Networks"],
+                "update_frequency": "Daily",
+                "status": "DEMO DATA (Live API offline - using WRIS GIS boundary baseline)"
+            },
+            {
+                "agency_code": "Bhuvan/NRSC",
+                "agency_name": "ISRO Bhuvan / National Remote Sensing Centre",
+                "dataset_types": ["Satellite Altimetry", "CartoDEM 30m", "Land Cover Dynamics"],
+                "update_frequency": "Periodic Satellite Passes",
+                "status": "DEMO DATA (Offline mode active)"
+            }
+        ],
+        "supported_modes": [
+            "OBSERVED", "HISTORICAL", "CLIMATOLOGICAL", "EXTREME", "DESIGN", "SCENARIO", "USER_DEFINED"
+        ]
+    }
+
+
+@router.post("/hydrology/pipeline")
+async def execute_hydrology_pipeline(payload: Dict[str, Any] = Body(...)):
+    """
+    Executes the authoritative 7-stage Hydrological Pipeline:
+    RAINFALL (IMD/CWC/THDC/WRIS/Bhuvan) -> CATCHMENT (SCS-CN) -> RUNOFF -> ROUTING -> INFLOW -> RESERVOIR -> SPILLWAY -> DOWNSTREAM HYDROGRAPH.
+    Prevents direct 1:1 conversion of September rainfall into dam inflow.
+    """
+    source_agency = str(payload.get("source_agency", "IMD"))
+    mode = str(payload.get("mode", "OBSERVED"))
+    rainfall_mm = float(payload.get("rainfall_mm", 180.0))
+    duration_hr = float(payload.get("duration_hr", 24.0))
+    cn_value = float(payload.get("cn_value", 78.0))
+    amc = str(payload.get("amc", "AMC_II"))
+    catchment_area_km2 = float(payload.get("catchment_area_km2", 1240.0))
+    time_of_concentration_hr = float(payload.get("time_of_concentration_hr", 6.4))
+    initial_water_level_m = float(payload.get("initial_water_level_m", 830.0))
+    is_live = bool(payload.get("is_live", False))
+
+    res = run_authoritative_hydrology_pipeline(
+        source_agency=source_agency,
+        mode=mode,
+        rainfall_mm=rainfall_mm,
+        duration_hr=duration_hr,
+        cn_value=cn_value,
+        amc=amc,
+        catchment_area_km2=catchment_area_km2,
+        time_of_concentration_hr=time_of_concentration_hr,
+        initial_water_level_m=initial_water_level_m,
+        is_live=is_live
+    )
+    return res
 
 
 @router.get("/forecast")
@@ -65,7 +155,6 @@ async def calculate_scs_cn(payload: Dict[str, Any] = Body(...)):
     time_of_concentration_hr = float(payload.get("time_of_concentration_hr", 6.4))
     provider_type = str(payload.get("provider_type", "DEMO"))
 
-    # Fetch rainfall time series
     if provider_type.upper() in ["HISTORICAL", "OBSERVED"]:
         provider = HistoricalRainfallProvider()
     elif provider_type.upper() in ["FORECAST"]:
@@ -76,7 +165,6 @@ async def calculate_scs_cn(payload: Dict[str, Any] = Body(...)):
     rf_data = provider.get_rainfall_series(catchment_id="cat-bhagirathi-001")
     rf_series = rf_data["rainfall_series"]
 
-    # Compute hydrograph
     hydrograph_data = compute_scs_runoff_hydrograph(
         rainfall_series=rf_series,
         cn_value=cn_value,
@@ -124,3 +212,4 @@ async def get_cn_lookup_matrix():
             {"land_use": "Water Body / Impounded Reservoir", "hsg_a": 100, "hsg_b": 100, "hsg_c": 100, "hsg_d": 100}
         ]
     }
+

@@ -172,3 +172,80 @@ async def connect_reservoir_condition_to_scenario(payload: Dict[str, Any] = Body
         "engine_message": f"Dam-Break Scenario Engine connected to '{selected_preset['name']}' reservoir condition ({water_level_m}m RL)."
     }
 
+
+@router.get("/dams/tehri/parameters")
+async def get_tehri_structured_parameters():
+    """
+    Returns structured authoritative parameter database for Tehri Dam & Reservoir,
+    including unit, source, source_url, provenance, confidence, verification_status, and notes for each parameter.
+    """
+    from app.dam_safety.tehri_authoritative_data import get_authoritative_tehri_parameters
+    return get_authoritative_tehri_parameters()
+
+
+@router.get("/reservoirs/operation/presets")
+async def get_reservoir_operation_presets():
+    """
+    Returns Phase 6 Reservoir Presets: MDDL (740m), MID_STORAGE (785m), FRL (830m), EXTREME (839.5m), USER_DEFINED.
+    """
+    from app.simulation.reservoir_operation_model import PRESET_CONFIGS
+    return {
+        "presets": list(PRESET_CONFIGS.values()),
+        "supported_codes": ["MDDL", "MID_STORAGE", "FRL", "EXTREME", "USER_DEFINED"]
+    }
+
+
+@router.post("/reservoirs/operation/simulate")
+async def run_reservoir_operation_simulation(payload: Dict[str, Any] = Body(...)):
+    """
+    Executes Tehri Reservoir Operation Model under water balance mass conservation.
+    Calculates storage(t), water_level(t), inflow(t), outflow(t), spillway_flow(t), and mass_balance_error_percent.
+    """
+    from app.simulation.reservoir_operation_model import (
+        ReservoirOperationModel,
+        ReservoirPreset
+    )
+    preset_str = str(payload.get("preset", "FRL")).upper()
+    custom_elevation = float(payload.get("initial_reservoir_elevation", 830.0))
+    controlled_outflow = float(payload.get("controlled_outflow_m3s", 450.0))
+    timestep_sec = float(payload.get("timestep_sec", 3600.0))
+    duration_sec = float(payload.get("simulation_duration_sec", 86400.0))
+    inflow_hydrograph = payload.get("inflow_hydrograph", [{"inflow_m3s": 1250.0} for _ in range(24)])
+
+    try:
+        preset_enum = ReservoirPreset[preset_str]
+    except KeyError:
+        preset_enum = ReservoirPreset.USER_DEFINED
+
+    model = ReservoirOperationModel(preset=preset_enum, custom_elevation=custom_elevation)
+    res = model.run_simulation(
+        inflow_hydrograph=inflow_hydrograph,
+        controlled_outflow_m3s=controlled_outflow,
+        timestep_sec=timestep_sec,
+        simulation_duration_sec=duration_sec
+    )
+    return res
+
+
+@router.post("/reservoirs/operation/downstream-coupled")
+async def run_reservoir_downstream_coupled(payload: Dict[str, Any] = Body(...)):
+    """
+    Couples initial reservoir level to downstream 2D hydrodynamics.
+    Proves that changing initial reservoir water level dynamically changes downstream depth, velocity, and inundation area.
+    """
+    from app.simulation.reservoir_operation_model import run_reservoir_downstream_coupled_simulation
+    initial_elevation = float(payload.get("initial_reservoir_elevation", 830.0))
+    breach_width = float(payload.get("breach_width_m", 180.0))
+    formation_time = float(payload.get("formation_time_hr", 1.5))
+    mannings_n = float(payload.get("mannings_n", 0.035))
+
+    res = run_reservoir_downstream_coupled_simulation(
+        initial_elevation_m=initial_elevation,
+        breach_width_m=breach_width,
+        formation_time_hr=formation_time,
+        mannings_n=mannings_n
+    )
+    return res
+
+
+

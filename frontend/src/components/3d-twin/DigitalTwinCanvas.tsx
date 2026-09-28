@@ -389,11 +389,12 @@ const AssetInfrastructure3DMeshes: React.FC<{
               <Html position={[0, 4, 0]} center>
                 <div
                   onClick={(e) => { e.stopPropagation(); onSelectAsset(asset); }}
-                  className={`cursor-pointer px-2 py-0.5 rounded text-[9px] font-mono font-bold border shadow backdrop-blur whitespace-nowrap ${
+                  className={`cursor-pointer px-2 py-0.5 rounded text-[9px] font-mono font-bold border shadow backdrop-blur whitespace-nowrap flex items-center space-x-1 ${
                     isFlooded ? 'bg-rose-950 text-rose-300 border-rose-500 animate-bounce' : 'bg-slate-900/90 text-emerald-300 border-slate-700'
                   }`}
                 >
-                  🌉 {asset.name} {isFlooded ? `(${asset.currentDepthM}m Flooded)` : ''}
+                  <span>🌉 {asset.name} {isFlooded ? `(${asset.currentDepthM}m Flooded)` : ''}</span>
+                  <span className="text-[8px] bg-amber-950 text-amber-300 px-1 rounded border border-amber-800">DEMO</span>
                 </div>
               </Html>
             </group>
@@ -413,11 +414,12 @@ const AssetInfrastructure3DMeshes: React.FC<{
             <Html position={[0, asset.heightM / 2 + 3, 0]} center>
               <div
                 onClick={(e) => { e.stopPropagation(); onSelectAsset(asset); }}
-                className={`cursor-pointer px-2 py-0.5 rounded text-[9px] font-mono font-bold border shadow backdrop-blur whitespace-nowrap ${
+                className={`cursor-pointer px-2 py-0.5 rounded text-[9px] font-mono font-bold border shadow backdrop-blur whitespace-nowrap flex items-center space-x-1 ${
                   isFlooded ? 'bg-rose-950 text-rose-300 border-rose-500 animate-pulse' : 'bg-slate-900/90 text-slate-200 border-slate-700'
                 }`}
               >
-                {asset.name} {isFlooded ? `[${asset.currentDepthM}m]` : ''}
+                <span>{asset.name} {isFlooded ? `[${asset.currentDepthM}m]` : ''}</span>
+                <span className="text-[8px] bg-amber-950 text-amber-300 px-1 rounded border border-amber-800">DEMO</span>
               </div>
             </Html>
           </group>

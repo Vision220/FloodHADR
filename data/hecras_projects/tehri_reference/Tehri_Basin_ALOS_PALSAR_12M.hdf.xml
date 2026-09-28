@@ -1,0 +1,22 @@
+{
+  "terrain_name": "Tehri_Basin_ALOS_PALSAR_12M",
+  "source_id": "NRSC_BHUVAN_ALOS_12M",
+  "crs": "EPSG:32644",
+  "grid_rows": 30,
+  "grid_cols": 30,
+  "cell_size_x_m": 25.0,
+  "cell_size_y_m": 25.0,
+  "vertical_units": "Meters",
+  "vertical_datum": "MSL",
+  "nodata_value": -9999.0,
+  "elevation_min_m": 1194.08,
+  "elevation_max_m": 1270.31,
+  "bounding_box": {
+    "min_x": 260000.0,
+    "max_x": 290000.0,
+    "min_y": 3350000.0,
+    "max_y": 3380000.0
+  },
+  "sha256_checksum": "5c08e91127e794fbda42ed54d051358fb23b0cde444cc374dd48f4af7705f26d",
+  "hec_ras_terrain_status": "EXPORTED_VALIDATED_MATCH"
+}

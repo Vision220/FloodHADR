@@ -85,15 +85,21 @@ async def get_grid_vs_sph_comparison():
         }
     }
 
+import json
+from app.simulation.engine import run_authoritative_simulation_pipeline
+from app.simulation.hecras_engine import hecras_reference_engine
+from app.schemas.domain_schemas import SimulationRun, SimulationFrame
+
 @router.post("", response_model=SimulationResponse, status_code=status.HTTP_201_CREATED)
 async def trigger_simulation(sim_in: SimulationCreate, db: AsyncSession = Depends(get_db)):
-
-    """Trigger a 2D hydrodynamic dam-break flood wave propagation simulation job."""
+    """
+    Trigger the Authoritative 2D Hydrodynamic Dam-Break Flood Wave Simulation Pipeline:
+    SCENARIO -> DEM -> HYDROLOGY -> RESERVOIR -> DAM BREAK -> 2D HYDRODYNAMICS -> SIMULATION FRAMES
+    """
     # Find scenario
     scen_result = await db.execute(select(DamBreakScenarioModel).where(DamBreakScenarioModel.id == sim_in.scenario_id))
     scenario = scen_result.scalar_one_or_none()
     if not scenario:
-        # Fallback to default scenario if provided ID doesn't exist
         fallback_res = await db.execute(select(DamBreakScenarioModel))
         scenario = fallback_res.scalars().first()
         if not scenario:
@@ -102,25 +108,45 @@ async def trigger_simulation(sim_in: SimulationCreate, db: AsyncSession = Depend
                 detail=f"Breach Scenario '{sim_in.scenario_id}' not found."
             )
 
+    # Execute Authoritative 2D Hydrodynamic Simulation Pipeline
+    sim_run_obj = run_authoritative_simulation_pipeline(
+        scenario_id=scenario.id,
+        scenario_title=scenario.title,
+        breach_width_m=scenario.breach_width_m,
+        breach_height_m=scenario.breach_height_m,
+        formation_time_hr=scenario.formation_time_hr,
+        reservoir_level_m=scenario.reservoir_water_level_percent * 8.3,
+        mannings_n=scenario.mannings_n
+    )
+
     unique_suffix = uuid.uuid4().hex[:6]
     sim_id = f"sim-{unique_suffix}"
-    
+
+    # Serialize frames and parameters into database object
+    frames_dict = [f.model_dump() for f in sim_run_obj.frames]
+
     db_obj = SimulationRunModel(
         id=sim_id,
         scenario_id=scenario.id,
         scenario_title=scenario.title,
         dam_name="Tehri Dam",
         study_area_name="Tehri River Basin & Downstream Valley",
+        model_id=sim_run_obj.model_id,
+        model_version=sim_run_obj.model_version,
+        dem_version=sim_run_obj.DEM_version,
+        provenance=sim_run_obj.provenance,
         status="Completed",
         progress_percent=100,
-        execution_time_sec=42.8,
-        max_flood_area_km2=round(scenario.breach_width_m * 1.5, 1),
-        max_depth_m=14.6,
-        max_velocity_ms=8.4,
-        affected_population=142500,
-        time_steps_total=72,
-        current_time_step_sec=21600,
+        execution_time_sec=sim_run_obj.execution_time_sec,
+        max_flood_area_km2=sim_run_obj.max_flood_area_km2,
+        max_depth_m=sim_run_obj.max_depth_m,
+        max_velocity_ms=sim_run_obj.max_velocity_ms,
+        affected_population=sim_run_obj.affected_population,
+        time_steps_total=len(sim_run_obj.frames),
+        current_time_step_sec=int(sim_run_obj.frames[-1].time_sec) if sim_run_obj.frames else 0,
         peak_flow_time_hr=scenario.formation_time_hr + 0.7,
+        parameters_json=json.dumps(sim_run_obj.parameters),
+        frames_json=json.dumps(frames_dict)
     )
     db.add(db_obj)
     await db.commit()
@@ -155,9 +181,29 @@ async def get_simulation_status(sim_id: str, db: AsyncSession = Depends(get_db))
         status=sim.status,
         progress_percent=sim.progress_percent,
         execution_time_sec=sim.execution_time_sec,
-        current_step=72,
+        current_step=sim.time_steps_total,
         total_steps=sim.time_steps_total,
     )
+
+@router.get("/{sim_id}/hecras", response_model=SimulationRun)
+async def get_hecras_reference_run(sim_id: str, db: AsyncSession = Depends(get_db)):
+    """
+    Triggers independent HEC-RAS 2D Reference Model simulation pipeline:
+    SCENARIO -> HEC-RAS MODEL -> HEC-RAS RESULTS -> MODEL COMPARISON / 2D GIS / 3D / HADR / REPORTS
+    """
+    sim_result = await db.execute(select(SimulationRunModel).where(SimulationRunModel.id == sim_id))
+    sim = sim_result.scalar_one_or_none()
+    
+    breach_width = 180.0
+    if sim and sim.scenario:
+        breach_width = sim.scenario.breach_width_m
+
+    hec_run = hecras_reference_engine.run_hecras_simulation(
+        scenario_id=sim.scenario_id if sim else "scen-tehri-overtop",
+        scenario_title=sim.scenario_title if sim else "Tehri PMF Overtopping Failure",
+        breach_width_m=breach_width
+    )
+    return hec_run
 
 @router.get("/{sim_id}/results", response_model=SimulationResultsResponse)
 async def get_simulation_results(sim_id: str, db: AsyncSession = Depends(get_db)):
@@ -170,16 +216,20 @@ async def get_simulation_results(sim_id: str, db: AsyncSession = Depends(get_db)
             detail=f"Simulation Run '{sim_id}' not found."
         )
 
-    peak_q, hydrograph_points = prototype_solver.compute_empirical_hydrograph(260.5, 3540.0)
+    sim_run_obj = run_authoritative_simulation_pipeline(
+        scenario_id=sim.scenario_id,
+        scenario_title=sim.scenario_title
+    )
     inundation_geojson = prototype_solver.parse_output_to_geojson("output_layer.geojson")
 
     return SimulationResultsResponse(
         simulation_id=sim.id,
         scenario_title=sim.scenario_title,
-        max_flood_area_km2=sim.max_flood_area_km2,
-        max_depth_m=sim.max_depth_m,
-        max_velocity_ms=sim.max_velocity_ms,
-        affected_population=sim.affected_population,
-        hydrograph=hydrograph_points,
+        max_flood_area_km2=sim_run_obj.max_flood_area_km2,
+        max_depth_m=sim_run_obj.max_depth_m,
+        max_velocity_ms=sim_run_obj.max_velocity_ms,
+        affected_population=sim_run_obj.affected_population,
+        hydrograph=sim_run_obj.hydrograph,
         inundation_geojson=inundation_geojson,
     )
+

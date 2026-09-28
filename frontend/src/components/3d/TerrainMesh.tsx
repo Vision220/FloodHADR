@@ -78,7 +78,7 @@ export const TerrainMesh: React.FC<TerrainMeshProps> = ({ terrainScale = 1.0 }) 
 
     const wireframe = new THREE.WireframeGeometry(geo);
 
-    return { geometry: geo, wireframeGeometry: wireframe, treePositions: trees };
+    return { geometry: geo, wireframeGeometry: wireframe };
   }, [terrainScale]);
 
   return (
@@ -97,29 +97,7 @@ export const TerrainMesh: React.FC<TerrainMeshProps> = ({ terrainScale = 1.0 }) 
       <lineSegments geometry={wireframeGeometry}>
         <lineBasicMaterial color="#0f291e" opacity={0.12} transparent />
       </lineSegments>
-
-      {/* 3D Pine Tree Forest Clusters on Hill Slopes */}
-      <group>
-        {treePositions.map(([tx, ty, tz, scale], idx) => (
-          <group key={idx} position={[tx, ty, tz]} scale={[scale, scale, scale]}>
-            {/* Trunk */}
-            <mesh position={[0, 1.2, 0]} castShadow>
-              <cylinderGeometry args={[0.25, 0.4, 2.4, 6]} />
-              <meshStandardMaterial color="#422006" roughness={0.9} />
-            </mesh>
-            {/* Lower Foliage Cone */}
-            <mesh position={[0, 3.2, 0]} castShadow>
-              <coneGeometry args={[1.8, 3.0, 6]} />
-              <meshStandardMaterial color="#064e3b" roughness={0.7} />
-            </mesh>
-            {/* Upper Foliage Cone */}
-            <mesh position={[0, 4.8, 0]} castShadow>
-              <coneGeometry args={[1.3, 2.4, 6]} />
-              <meshStandardMaterial color="#047857" roughness={0.7} />
-            </mesh>
-          </group>
-        ))}
-      </group>
     </group>
   );
 };
+

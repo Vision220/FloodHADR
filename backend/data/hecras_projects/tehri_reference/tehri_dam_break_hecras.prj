@@ -1,0 +1,13 @@
+Proj Title=Tehri Dam Break HEC-RAS 2D Reference Model
+Current Plan=p01
+Default End Header=
+Geom File=g01
+Unsteady File=u01
+Plan File=p01
+Y Axis Title=
+X Axis Title=
+Units=SI Units
+Spatial Reference System=EPSG:32644
+Terrain Raster=tehri_terrain.hdf
+Description=FloodHADR v2 HEC-RAS 2D Hydrodynamic Benchmark Reference Model for Tehri Dam Break Scenario.
+Project Date=2026-09-28 02:07:54Z

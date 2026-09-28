@@ -1,0 +1,7 @@
+Unsteady Title=Tehri Inflow Hydrograph & Boundary Conditions
+Boundary Location=Tehri Dam Toe
+Boundary Type=Flow Hydrograph
+Peak Discharge M3S=451774.1
+Downstream Boundary Location=Devprayag Outflow
+Downstream Boundary Type=Normal Depth
+Friction Slope=0.008

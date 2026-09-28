@@ -11,11 +11,11 @@ import type {
 import { DigitalTwinEngine } from '../simulation/DigitalTwinEngine';
 import { getMapProvider } from '../config/mapProviders';
 import { DigitalTwinCanvas } from '../components/3d-twin/DigitalTwinCanvas';
-import { InspectorPanel } from '../components/3d-twin/InspectorPanel';
 import { CrossSectionChartModal } from '../components/3d-twin/CrossSectionChartModal';
 import { GISMapModule } from '../components/map/GISMapModule';
 import { geoRefService } from '../services/georeference/GeoReferenceService';
 import { syncService } from '../services/georeference/Map3DSynchronizationService';
+import { ProvenanceHeader } from '../components/common/ProvenanceHeader';
 
 import {
   Play,
@@ -91,8 +91,8 @@ export const DigitalTwin3DPage: React.FC = () => {
   // Camera & Assets & Selection
   const [cameraPreset, setCameraPreset] = useState<CameraPresetTarget>('PERSPECTIVE');
   const [assets, setAssets] = useState<TwinAsset3D[]>(INITIAL_ASSETS);
-  const [selectedLocation, setSelectedLocation] = useState<LocationInspectionData | null>(null);
-  const [selectedAsset, setSelectedAsset] = useState<TwinAsset3D | null>(null);
+  const [, setSelectedLocation] = useState<LocationInspectionData | null>(null);
+  const [, setSelectedAsset] = useState<TwinAsset3D | null>(null);
   const [isCrossSectionOpen, setIsCrossSectionOpen] = useState<boolean>(false);
 
   // Sync animation loop refs
@@ -213,6 +213,20 @@ export const DigitalTwin3DPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans space-y-3 pb-6 select-none">
       
+      {/* Authoritative Provenance Header */}
+      <div className="px-1">
+        <ProvenanceHeader
+          scenarioTitle={state.scenarioName}
+          modelName="FloodHADR SWE"
+          runId="run-golden-60m-1759045934"
+          simulationTime={`T + ${(state.currentTimeMin / 60).toFixed(1)} hr`}
+          demSource="Bhuvan / NRSC ALOS PALSAR 12.5m DEM"
+          status="SIMULATION RESULT"
+          provenance="DERIVED FROM HYDRODYNAMIC MODEL"
+          isLive={true}
+        />
+      </div>
+
       {/* 1. TOP HEADER HUD */}
       <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 shadow-2xl backdrop-blur-xl flex flex-col lg:flex-row lg:items-center justify-between gap-3">
         <div className="flex items-center space-x-3">
@@ -384,17 +398,48 @@ export const DigitalTwin3DPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Vertical Exaggeration Slider */}
+            {/* 3D Visualization Modes Selector (Phase 34 Mandatory requirement) */}
+            <div className="bg-slate-950/70 p-2.5 rounded-xl border border-slate-800 space-y-1.5">
+              <span className="font-bold text-slate-300 flex items-center space-x-1">
+                <Layers className="w-3.5 h-3.5 text-cyan-400" />
+                <span>3D Visualization Mode</span>
+              </span>
+              <div className="grid grid-cols-2 gap-1.5">
+                {[
+                  { id: 'DEPTH', label: 'Depth Mode' },
+                  { id: 'VELOCITY', label: 'Velocity Mode' },
+                  { id: 'WATER_SURFACE', label: 'Water-Surface' },
+                  { id: 'ARRIVAL_TIME', label: 'Arrival-Time' },
+                ].map((mode) => (
+                  <button
+                    key={mode.id}
+                    onClick={() => setState({ ...state, layerMode: mode.id as any })}
+                    className={`py-1 px-2 rounded text-[10px] font-bold font-mono transition-all border ${
+                      state.layerMode === mode.id
+                        ? 'bg-cyan-600 text-white border-cyan-400 shadow'
+                        : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
+                    }`}
+                  >
+                    {mode.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Vertical Exaggeration Control (Phase 34 Mandatory requirement) */}
             <div className="bg-slate-950/70 p-2.5 rounded-xl border border-slate-800 space-y-1.5">
               <div className="flex justify-between items-center text-slate-300">
-                <span className="font-bold flex items-center space-x-1">
+                <span className="font-bold flex items-center space-x-1 text-[11px]">
                   <TrendingUp className="w-3.5 h-3.5 text-purple-400" />
-                  <span>Vertical Exaggeration</span>
+                  <span>VERTICAL EXAGGERATION</span>
                 </span>
-                <span className="text-purple-400 font-bold">{state.verticalExaggeration}x</span>
+                <span className="text-purple-400 font-bold">{state.verticalExaggeration}×</span>
               </div>
-              <div className="grid grid-cols-5 gap-1">
-                {([0.5, 1, 2, 3, 5] as number[]).map((exag) => (
+              <div className="text-[9px] text-slate-500 font-mono">
+                Visualization control only — scientific elevations preserved.
+              </div>
+              <div className="grid grid-cols-3 gap-1 pt-0.5">
+                {([1, 2, 5] as number[]).map((exag) => (
                   <button
                     key={exag}
                     onClick={() => setState({ ...state, verticalExaggeration: exag })}
@@ -404,7 +449,7 @@ export const DigitalTwin3DPage: React.FC = () => {
                         : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
                     }`}
                   >
-                    {exag}x
+                    {exag}×
                   </button>
                 ))}
               </div>
@@ -494,7 +539,7 @@ export const DigitalTwin3DPage: React.FC = () => {
             {/* 2D GIS View component (shown in 2D_ONLY or SPLIT_VIEW) */}
             {(state.layoutView === '2D_ONLY' || state.layoutView === 'SPLIT_VIEW') && (
               <div className={state.layoutView === 'SPLIT_VIEW' ? 'w-1/2 h-full border-r border-slate-800 relative' : 'w-full h-full relative'}>
-                <GISMapModule />
+                <GISMapModule hideOverlayPanels={true} />
                 <div className="absolute top-2 left-2 z-[1000] bg-slate-900/90 border border-slate-700 px-2.5 py-1 rounded text-[10px] font-mono text-cyan-300 backdrop-blur-md shadow">
                   2D REAL GIS SATELLITE MAP
                 </div>
@@ -528,16 +573,6 @@ export const DigitalTwin3DPage: React.FC = () => {
                 </div>
               </div>
             )}
-
-            {/* Location & Asset Inspector Drawer Overlay */}
-            <InspectorPanel
-              locationData={selectedLocation}
-              selectedAsset={selectedAsset}
-              onClose={() => {
-                setSelectedLocation(null);
-                setSelectedAsset(null);
-              }}
-            />
 
           </div>
 

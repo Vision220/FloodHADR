@@ -1,0 +1,15 @@
+Geom Title=Tehri Downstream Valley 2D Geometry
+Program Version=6.4.1
+2D Area Perimeter Name=TehriValley2D
+2D Area Cell Size=25.0,25.0
+2D Area Manning n Default=0.035
+2D Area Dam Location Row=2,Col=2
+2D Area Grid Dimensions Rows=30,Cols=30
+SA/2D Area N Value Region=1
+Region Name=Valley Riverbed & Floodplain
+Region Manning n=0.035
+Structure Name=Tehri Dam
+Structure Stationing=0.0
+Structure Height=260.5
+Structure Top Crest Elevation=840.0
+Structure Foundation Elevation=579.0

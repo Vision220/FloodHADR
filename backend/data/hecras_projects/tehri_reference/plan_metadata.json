@@ -1,0 +1,10 @@
+{
+  "plan_title": "Tehri 2D Unsteady Dam Break Plan",
+  "plan_file": "tehri_dam_break_hecras.p01",
+  "unsteady_file": "tehri_dam_break_hecras.u01",
+  "governing_equations": "Full 2D Shallow Water Equations (SWE)",
+  "computation_interval_sec": 2.0,
+  "simulation_duration_hr": 6.0,
+  "downstream_boundary": "OPEN_OUTFLOW_NORMAL_DEPTH",
+  "status": "HEC-RAS PLAN GENERATED"
+}

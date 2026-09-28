@@ -96,3 +96,50 @@ async def run_hydrodynamic_simulation(payload: Dict[str, Any] = Body(...)):
         include_dam_breach=include_dam_breach
     )
     return result
+
+
+@router.get("/hydrodynamics/2d/modes")
+async def get_2d_solver_modes():
+    """Returns available 2D solver modes: SWE (Shallow Water Equations) and DWE (Diffusion Wave Equation)."""
+    return {
+        "primary_mode": "SWE (2D Shallow Water Equations - High Fidelity)",
+        "secondary_mode": "DWE (2D Diffusion Wave Equation - Rapid)",
+        "supported_modes": ["SWE", "DWE"]
+    }
+
+
+@router.post("/hydrodynamics/2d/simulate")
+async def run_2d_hydrodynamic_simulation(payload: Dict[str, Any] = Body(...)):
+    """
+    Executes Phase 8 Upgraded 2D Hydrodynamic Engine (SWE / DWE).
+    Calculates depth, velocity_x, velocity_y, velocity_magnitude, WSE, flood extent, arrival_time,
+    flood_duration, max_depth, max_velocity, flow_direction, and virtual_gauge_hydrographs.
+    Audits mass-balance error, CFL, timestep, and displays execution metrics.
+    """
+    from app.simulation.hydrodynamic_2d_solver import run_authoritative_2d_hydrodynamic_simulation
+
+    mode = str(payload.get("mode", "SWE"))
+    breach_width_m = float(payload.get("breach_width_m", 180.0))
+    reservoir_level_m = float(payload.get("reservoir_level_m", 830.0))
+    breach_formation_time_hr = float(payload.get("breach_formation_time_hr", 1.5))
+    manning_n = float(payload.get("manning_n", 0.035))
+    boundary_condition = str(payload.get("boundary_condition", "OPEN_OUTFLOW"))
+    grid_rows = int(payload.get("grid_rows", 30))
+    grid_cols = int(payload.get("grid_cols", 30))
+    dx = float(payload.get("dx", 25.0))
+    dy = float(payload.get("dy", 25.0))
+
+    res = run_authoritative_2d_hydrodynamic_simulation(
+        mode=mode,
+        breach_width_m=breach_width_m,
+        reservoir_level_m=reservoir_level_m,
+        breach_formation_time_hr=breach_formation_time_hr,
+        manning_n=manning_n,
+        boundary_condition=boundary_condition,
+        grid_rows=grid_rows,
+        grid_cols=grid_cols,
+        dx=dx,
+        dy=dy
+    )
+    return res
+

@@ -1,0 +1,347 @@
+{
+  "status": "success",
+  "model_type": "HEC-RAS 2D Hydraulic Model",
+  "scenario_id": "scen-tehri-overtop",
+  "metadata": {
+    "mesh_size_m": 25.0,
+    "mesh_size": "25.0m \u00d7 25.0m (MEDIUM)",
+    "mesh_preset": "MEDIUM",
+    "cell_count": 1188,
+    "breaklines": [
+      "Bhagirathi_Main_Channel_Thalweg",
+      "Right_Canyon_Wall_Ridge",
+      "Left_Canyon_Wall_Ridge"
+    ],
+    "refinement_regions": [
+      "Dam_Toe_High_Gradient_Zone",
+      "Koti_Nala_Confluence_Zone"
+    ],
+    "timestep_s": 2.0,
+    "timestep": "2.0s",
+    "solver": "HEC-RAS SWE",
+    "solver_full_name": "HEC-RAS SWE (Full 2D Shallow Water Equations)",
+    "boundary_conditions": {
+      "upstream": "Dam Breach Peak Hydrograph",
+      "downstream": "Normal Depth (Slope=0.005)"
+    },
+    "accuracy_notice": "Mesh Option: MEDIUM (25.0m x 25.0m). SCIENTIFIC NOTICE: A finer mesh increases spatial discretization detail but does NOT automatically guarantee higher hydraulic accuracy. Finer grids require smaller computational timesteps under CFL stability rules, increase CPU runtime significantly, and can amplify localized numerical dispersion if bed roughness and topography gradients are under-resolved."
+  },
+  "components": {
+    "terrain": {
+      "terrain_name": "Tehri_Basin_ALOS_PALSAR_12M",
+      "source_id": "NRSC_BHUVAN_ALOS_12M",
+      "crs": "EPSG:32644",
+      "grid_rows": 30,
+      "grid_cols": 30,
+      "cell_size_x_m": 25.0,
+      "cell_size_y_m": 25.0,
+      "vertical_units": "Meters",
+      "vertical_datum": "MSL",
+      "nodata_value": -9999.0,
+      "elevation_min_m": 1194.08,
+      "elevation_max_m": 1270.31,
+      "bounding_box": {
+        "min_x": 260000.0,
+        "max_x": 290000.0,
+        "min_y": 3350000.0,
+        "max_y": 3380000.0
+      },
+      "sha256_checksum": "5c08e91127e794fbda42ed54d051358fb23b0cde444cc374dd48f4af7705f26d",
+      "hec_ras_terrain_status": "EXPORTED_VALIDATED_MATCH"
+    },
+    "flow_area_2d": {
+      "area_name": "Tehri_Downstream_Domain",
+      "bounding_box": [
+        0.0,
+        0.0,
+        750.0,
+        750.0
+      ]
+    },
+    "computational_mesh": {
+      "preset": "MEDIUM",
+      "resolution_preset": "MEDIUM",
+      "dx_m": 25.0,
+      "dy_m": 25.0,
+      "recommended_timestep_s": 2.0,
+      "mesh_size": "25.0m \u00d7 25.0m (MEDIUM)",
+      "cell_size_x_m": 25.0,
+      "cell_size_y_m": 25.0,
+      "base_grid_rows": 30,
+      "base_grid_cols": 30,
+      "base_cell_count": 900,
+      "total_cell_count": 1188,
+      "cell_count": 1188,
+      "cell_area_m2": 625.0,
+      "breaklines_count": 3,
+      "refinement_regions_count": 2,
+      "breaklines": [
+        {
+          "name": "Bhagirathi_Main_Channel_Thalweg",
+          "description": "Main river centerline breakline enforcing cell face alignment along channel bed.",
+          "coordinates": [
+            [
+              0.0,
+              375.0
+            ],
+            [
+              375.0,
+              375.0
+            ],
+            [
+              750.0,
+              375.0
+            ]
+          ],
+          "enforce_cell_faces": true
+        },
+        {
+          "name": "Right_Canyon_Wall_Ridge",
+          "description": "Right valley steep slope breakline.",
+          "coordinates": [
+            [
+              0.0,
+              200.0
+            ],
+            [
+              750.0,
+              200.0
+            ]
+          ],
+          "enforce_cell_faces": true
+        },
+        {
+          "name": "Left_Canyon_Wall_Ridge",
+          "description": "Left valley slope boundary breakline.",
+          "coordinates": [
+            [
+              0.0,
+              550.0
+            ],
+            [
+              750.0,
+              550.0
+            ]
+          ],
+          "enforce_cell_faces": true
+        }
+      ],
+      "refinement_regions": [
+        {
+          "name": "Dam_Toe_High_Gradient_Zone",
+          "description": "Refinement zone near dam toe breach exit for steep wave front capture.",
+          "bounding_box": {
+            "min_x": 0.0,
+            "max_x": 150.0,
+            "min_y": 300.0,
+            "max_y": 450.0
+          },
+          "refinement_factor": 0.5
+        },
+        {
+          "name": "Koti_Nala_Confluence_Zone",
+          "description": "Refinement zone at Koti Nala tributary confluence.",
+          "bounding_box": {
+            "min_x": 300.0,
+            "max_x": 450.0,
+            "min_y": 250.0,
+            "max_y": 500.0
+          },
+          "refinement_factor": 0.5
+        }
+      ],
+      "trade_off_notice": "Mesh Option: MEDIUM (25.0m x 25.0m). SCIENTIFIC NOTICE: A finer mesh increases spatial discretization detail but does NOT automatically guarantee higher hydraulic accuracy. Finer grids require smaller computational timesteps under CFL stability rules, increase CPU runtime significantly, and can amplify localized numerical dispersion if bed roughness and topography gradients are under-resolved.",
+      "crs": "EPSG:32644",
+      "status": "HEC-RAS 2D MESH GENERATED"
+    },
+    "breaklines": [
+      {
+        "name": "Bhagirathi_Main_Channel_Thalweg",
+        "description": "Main river centerline breakline enforcing cell face alignment along channel bed.",
+        "coordinates": [
+          [
+            0.0,
+            375.0
+          ],
+          [
+            375.0,
+            375.0
+          ],
+          [
+            750.0,
+            375.0
+          ]
+        ],
+        "enforce_cell_faces": true
+      },
+      {
+        "name": "Right_Canyon_Wall_Ridge",
+        "description": "Right valley steep slope breakline.",
+        "coordinates": [
+          [
+            0.0,
+            200.0
+          ],
+          [
+            750.0,
+            200.0
+          ]
+        ],
+        "enforce_cell_faces": true
+      },
+      {
+        "name": "Left_Canyon_Wall_Ridge",
+        "description": "Left valley slope boundary breakline.",
+        "coordinates": [
+          [
+            0.0,
+            550.0
+          ],
+          [
+            750.0,
+            550.0
+          ]
+        ],
+        "enforce_cell_faces": true
+      }
+    ],
+    "refinement_regions": [
+      {
+        "name": "Dam_Toe_High_Gradient_Zone",
+        "description": "Refinement zone near dam toe breach exit for steep wave front capture.",
+        "bounding_box": {
+          "min_x": 0.0,
+          "max_x": 150.0,
+          "min_y": 300.0,
+          "max_y": 450.0
+        },
+        "refinement_factor": 0.5
+      },
+      {
+        "name": "Koti_Nala_Confluence_Zone",
+        "description": "Refinement zone at Koti Nala tributary confluence.",
+        "bounding_box": {
+          "min_x": 300.0,
+          "max_x": 450.0,
+          "min_y": 250.0,
+          "max_y": 500.0
+        },
+        "refinement_factor": 0.5
+      }
+    ],
+    "manning_n": {
+      "channel": 0.035,
+      "floodplain": 0.065,
+      "steep_bed": 0.08
+    },
+    "upstream_boundary": {
+      "boundary_name": "Upstream_Dam_Toe_Inflow",
+      "boundary_type": "Flow Hydrograph (Dam Breach Peak Outflow)",
+      "peak_discharge_m3s": 451774.1
+    },
+    "downstream_boundary": {
+      "boundary_name": "Downstream_Devprayag_Outflow",
+      "boundary_type": "Normal Depth (Open Outflow Friction Slope S0=0.008)",
+      "friction_slope": 0.008
+    },
+    "reservoir_condition": {
+      "initial_water_level_m": 830.0
+    },
+    "dam_connection": {
+      "dam_height_m": 260.5,
+      "crest_length_m": 575.0
+    },
+    "breach_configuration": {
+      "breach_width_m": 180.0,
+      "breach_height_m": 120.0,
+      "formation_time_hr": 1.5,
+      "reservoir_level_m": 830.0,
+      "breach_bottom_elevation_m": 579.0,
+      "side_slopes": 0.5,
+      "failure_mode": "OVERTOPPING",
+      "discharge_coefficient": 1.7,
+      "reservoir_head_m": 251.0,
+      "reservoir_storage_m3": 3540000000.0,
+      "froehlich_peak_discharge_m3s": 451774.1,
+      "provenance": "SCENARIO_PARAMETRIC",
+      "status": "HEC-RAS BREACH GENERATED"
+    }
+  },
+  "hec_ras_project_status": "HEC-RAS PROJECT: GENERATED",
+  "hec_ras_execution_status": "HEC-RAS EXECUTION: NOT AVAILABLE",
+  "execution_status": "HEC-RAS EXECUTION: NOT AVAILABLE",
+  "validation_report": {
+    "validation_passed": true,
+    "total_checks": 7,
+    "passed_checks": 7,
+    "equivalence_status": "100% PARAMETER EQUIVALENT",
+    "validation_items": [
+      {
+        "parameter": "Terrain Coordinate Reference System (CRS)",
+        "floodhadr_value": "EPSG:32644",
+        "hec_ras_value": "EPSG:32644",
+        "match": true,
+        "unit": "Coordinate System",
+        "notes": "Identical CRS (EPSG:32644 WGS 84 / UTM Zone 44N) enforced."
+      },
+      {
+        "parameter": "Horizontal Grid Cell Resolution",
+        "floodhadr_value": 25.0,
+        "hec_ras_value": 25.0,
+        "match": true,
+        "unit": "Meters",
+        "notes": "Identical 25.0m x 25.0m grid resolution enforced."
+      },
+      {
+        "parameter": "Initial Reservoir Elevation (H0)",
+        "floodhadr_value": 830.0,
+        "hec_ras_value": 830.0,
+        "match": true,
+        "unit": "Meters EL",
+        "notes": "Identical initial pool elevation (830.0m FRL) enforced."
+      },
+      {
+        "parameter": "Dam Breach Width",
+        "floodhadr_value": 180.0,
+        "hec_ras_value": 180.0,
+        "match": true,
+        "unit": "Meters",
+        "notes": "Identical dam breach top width enforced."
+      },
+      {
+        "parameter": "Breach Formation Time (Tf)",
+        "floodhadr_value": 1.5,
+        "hec_ras_value": 1.5,
+        "match": true,
+        "unit": "Hours",
+        "notes": "Identical Froehlich breach development time enforced."
+      },
+      {
+        "parameter": "Manning Roughness Coefficient (n)",
+        "floodhadr_value": 0.035,
+        "hec_ras_value": 0.035,
+        "match": true,
+        "unit": "s/m^(1/3)",
+        "notes": "Identical friction factor (n=0.035) enforced."
+      },
+      {
+        "parameter": "Breach Failure Mode",
+        "floodhadr_value": "OVERTOPPING",
+        "hec_ras_value": "OVERTOPPING",
+        "match": true,
+        "unit": "Scenario Mode",
+        "notes": "Identical failure mechanism (OVERTOPPING) enforced."
+      }
+    ]
+  },
+  "execution_time_sec": 0.028,
+  "results_summary": {
+    "hec_ras_project_status": "HEC-RAS PROJECT: GENERATED",
+    "hec_ras_execution_status": "HEC-RAS EXECUTION: NOT AVAILABLE",
+    "results_present": false,
+    "parsed_rasters_available": false,
+    "hydrograph_available": false,
+    "message": "No HEC-RAS output rasters or hydrographs available because local executable was not run.",
+    "provenance": "UNEXECUTED_PROJECT_DEFINITION"
+  }
+}

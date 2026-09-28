@@ -4,6 +4,7 @@ import { StatCard } from '../components/common/StatCard';
 import { GISMapModule } from '../components/map/GISMapModule';
 import { HydrographChart } from '../components/analytics/HydrographChart';
 import { mockScenarios } from '../data/mockData';
+import { ProvenanceHeader } from '../components/common/ProvenanceHeader';
 import {
   MapPin,
   Flame,
@@ -53,6 +54,18 @@ export const DashboardPage: React.FC = () => {
   return (
     <div className="space-y-6 bg-slate-50 min-h-screen p-1">
       
+      {/* Authoritative Provenance Header */}
+      <ProvenanceHeader
+        scenarioTitle="Tehri FRL Breach (PMF Overtopping)"
+        modelName="FloodHADR SWE"
+        runId="run-golden-60m-1759045934"
+        simulationTime={`T + ${(currentTimeStep * 0.1).toFixed(1)} hr`}
+        demSource="Bhuvan / NRSC ALOS PALSAR 12.5m DEM"
+        status="SIMULATION RESULT"
+        provenance="DERIVED FROM HYDRODYNAMIC MODEL"
+        isLive={true}
+      />
+
       {/* DEMONSTRATION MODE HERO BANNER */}
       <div className="bg-gradient-to-r from-slate-950 via-sky-950 to-slate-900 text-white rounded-2xl p-6 shadow-xl border border-sky-700/50 flex flex-col md:flex-row md:items-center justify-between gap-5 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>

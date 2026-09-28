@@ -80,11 +80,15 @@ class DamBreakScenarioModel(Base):
 class SimulationRunModel(Base):
     __tablename__ = "simulations"
 
-    id: Mapped[str] = mapped_column(String(50), primary_key=True, index=True)
+    id: Mapped[str] = mapped_column(String(50), primary_key=True, index=True) # run_id
     scenario_id: Mapped[str] = mapped_column(String(50), ForeignKey("scenarios.id"), nullable=False)
     scenario_title: Mapped[str] = mapped_column(String(200), nullable=False)
     dam_name: Mapped[str] = mapped_column(String(150), nullable=False)
     study_area_name: Mapped[str] = mapped_column(String(200), nullable=False)
+    model_id: Mapped[str] = mapped_column(String(100), default="model-floodhadr-2d-swe")
+    model_version: Mapped[str] = mapped_column(String(50), default="v2.0-SWE")
+    dem_version: Mapped[str] = mapped_column(String(100), default="ALOS_PALSAR_12M_REAL")
+    provenance: Mapped[str] = mapped_column(String(50), default="MODELLED") # MODELLED | OBSERVED | SCENARIO | REFERENCE | DEMO
     status: Mapped[str] = mapped_column(String(50), default="Completed")
     progress_percent: Mapped[int] = mapped_column(Integer, default=100)
     execution_time_sec: Mapped[float] = mapped_column(Float, default=35.0)
@@ -95,7 +99,10 @@ class SimulationRunModel(Base):
     time_steps_total: Mapped[int] = mapped_column(Integer, default=72)
     current_time_step_sec: Mapped[int] = mapped_column(Integer, default=21600)
     peak_flow_time_hr: Mapped[float] = mapped_column(Float, default=2.0)
+    parameters_json: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    frames_json: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     output_geojson_json: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.utcnow)
 
     scenario: Mapped["DamBreakScenarioModel"] = relationship("DamBreakScenarioModel", back_populates="simulations")
+

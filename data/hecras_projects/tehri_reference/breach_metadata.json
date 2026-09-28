@@ -1,0 +1,15 @@
+{
+  "breach_width_m": 180.0,
+  "breach_height_m": 120.0,
+  "formation_time_hr": 1.5,
+  "reservoir_level_m": 830.0,
+  "breach_bottom_elevation_m": 579.0,
+  "side_slopes": 0.5,
+  "failure_mode": "OVERTOPPING",
+  "discharge_coefficient": 1.7,
+  "reservoir_head_m": 251.0,
+  "reservoir_storage_m3": 3540000000.0,
+  "froehlich_peak_discharge_m3s": 451774.1,
+  "provenance": "SCENARIO_PARAMETRIC",
+  "status": "HEC-RAS BREACH GENERATED"
+}

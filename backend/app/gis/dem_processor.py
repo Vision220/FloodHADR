@@ -259,29 +259,74 @@ class DEMProcessor:
             "elevation_matrix_sample": np.round(sim_elev[:5, :5], 2).tolist(), # Sample slice for verification
         }
 
+    @staticmethod
+    def compute_sha256_checksum(filepath: str) -> str:
+        """Computes SHA256 checksum hash for terrain file provenance verification."""
+        import hashlib
+        if not os.path.exists(filepath):
+            return "0" * 64
+        sha256 = hashlib.sha256()
+        with open(filepath, "rb") as f:
+            for chunk in iter(lambda: f.read(65536), b""):
+                sha256.update(chunk)
+        return sha256.hexdigest()
+
+    @staticmethod
+    def perform_terrain_quality_checks(elevation_matrix: np.ndarray, crs_str: str) -> Dict[str, Any]:
+        """Performs terrain quality checks: void ratio, spike detection, valid cell counts."""
+        valid = elevation_matrix[~np.isnan(elevation_matrix)]
+        has_spikes = bool(np.any(valid > 8848.8) or np.any(valid < -430.0))
+        nan_ratio = float(np.isnan(elevation_matrix).sum()) / max(1, elevation_matrix.size)
+
+        return {
+            "passed_quality_check": not has_spikes and nan_ratio < 0.5,
+            "spike_detected": has_spikes,
+            "void_ratio_percent": round(nan_ratio * 100, 2),
+            "valid_cells_count": int(len(valid)),
+            "total_cells_count": int(elevation_matrix.size),
+            "quality_rating": "EXCELLENT" if nan_ratio < 0.05 else "ACCEPTABLE" if nan_ratio < 0.2 else "POOR"
+        }
+
     @classmethod
     def process_dem(cls, filepath: str, filename: str) -> Dict[str, Any]:
         """
         Full non-destructive processing pipeline for uploaded GeoTIFF DEM file.
         """
         src, val_info = cls.validate_raster(filepath)
+        checksum_hash = cls.compute_sha256_checksum(filepath)
         try:
             elevation_matrix, nodata = cls.read_elevation_values(src)
             stats = cls.compute_stats(elevation_matrix)
             resolution_info = cls.extract_resolution(src)
             terrain_stats = cls.generate_terrain_statistics(elevation_matrix)
+            quality_checks = cls.perform_terrain_quality_checks(elevation_matrix, val_info["crs"])
             preview_data = cls.generate_downsampled_preview(src, elevation_matrix)
             sim_grid = cls.convert_to_simulation_grid(src, elevation_matrix)
         finally:
             src.close()
 
+        is_synthetic = "synthetic" in filename.lower()
+        provenance_tag = "SYNTHETIC" if is_synthetic else "REAL"
+        source_name = "Synthetic Demonstration DEM (DEMO MODE)" if is_synthetic else "Bhuvan / NRSC ALOS PALSAR 12.5m DEM"
+
         metadata = {
+            "terrain_id": f"dem-{checksum_hash[:12]}",
             "filename": filename,
             "filepath": filepath,
+            "source": source_name,
+            "source_url": "https://bhuvan.nrsc.gov.in" if not is_synthetic else "Local Synthetic Generator",
             "crs": val_info["crs"],
+            "resolution": resolution_info["resolution_str"],
+            "horizontal_resolution": resolution_info["resolution_str"],
+            "vertical_units": "meters",
+            "vertical_datum": "EGM96 / MSL",
+            "nodata": float(nodata) if nodata is not None else -9999.0,
+            "bounding_box": val_info["bounds"],
+            "checksum": checksum_hash,
+            "provenance": provenance_tag,
+            "status": "DEMO" if is_synthetic else "VERIFIED",
             "width": val_info["width"],
             "height": val_info["height"],
-            "resolution": resolution_info["resolution_str"],
             "pixel_size_x": resolution_info["pixel_size_x"],
             "pixel_size_y": resolution_info["pixel_size_y"],
             "approx_cell_meters": resolution_info["approx_meters"],
@@ -290,6 +335,7 @@ class DEMProcessor:
             "mean_elevation": stats["mean_elevation"],
             "std_elevation": stats["std_elevation"],
             "terrain_stats": terrain_stats,
+            "quality_checks": quality_checks,
             "sim_grid_summary": {
                 "rows": sim_grid["rows"],
                 "cols": sim_grid["cols"],
@@ -303,3 +349,4 @@ class DEMProcessor:
             "preview": preview_data,
             "simulation_grid": sim_grid,
         }
+

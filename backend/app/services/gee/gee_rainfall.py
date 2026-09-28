@@ -52,8 +52,14 @@ class GEERainfallService:
 
                 return {
                     "status": "SUCCESS",
-                    "dataset": "CHIRPS Daily Precipitation (UCSB-CHG/CHIRPS/DAILY)",
-                    "observation_period": f"{start_date} to {end_date}",
+                    "execution_state": "LIVE",
+                    "dataset": "UCSB-CHG/CHIRPS/DAILY",
+                    "acquisition_date": f"{start_date} to {end_date}",
+                    "processing_method": "Infrared Cold Cloud Duration (CCD) & Gauge Calibration Reduction",
+                    "cloud_filtering": "Thermal Infrared Cloud-Top Temperature Thresholding",
+                    "spatial_resolution": "0.05° (~5.5km)",
+                    "source": "Google Earth Engine Data Catalog / Climate Hazards Center",
+                    "provenance": "OBSERVED",
                     "total_cumulative_rainfall_mm": total_mm,
                     "max_daily_rainfall_mm": max_mm,
                     "mean_daily_rainfall_mm": round(total_mm / 14, 1),
@@ -66,20 +72,34 @@ class GEERainfallService:
                         {"date": "2026-07-05", "rainfall_mm": 45.0},
                         {"date": "2026-07-06", "rainfall_mm": 28.4},
                         {"date": "2026-07-07", "rainfall_mm": 16.4}
-                    ],
-                    "resolution": "0.05° (~5.5km) Spatial Resolution",
-                    "data_source": "Google Earth Engine Data Catalog",
-                    "provenance": "OBSERVED",
-                    "mode": "REAL_GEE_AUTHENTICATED"
+                    ]
                 }
             except Exception as e:
                 logger.error(f"GEE CHIRPS rainfall error: {str(e)}")
+                return {
+                    "status": "ERROR",
+                    "execution_state": "ERROR",
+                    "dataset": "UCSB-CHG/CHIRPS/DAILY",
+                    "acquisition_date": f"{start_date} to {end_date}",
+                    "processing_method": "FAILED",
+                    "cloud_filtering": "N/A",
+                    "spatial_resolution": "0.05° (~5.5km)",
+                    "source": "Google Earth Engine Data Catalog",
+                    "provenance": "NOT_CONFIGURED",
+                    "error_detail": str(e)
+                }
 
-        # Fallback response for DEMO / Offline GEE mode
+        # Fallback response for DEMO / Unauthenticated GEE mode
         return {
             "status": "SUCCESS",
-            "dataset": "CHIRPS Daily Precipitation (UCSB-CHG/CHIRPS/DAILY)",
-            "observation_period": f"{start_date} to {end_date}",
+            "execution_state": "DEMO" if self.client.is_auth is False else "NOT CONFIGURED",
+            "dataset": "UCSB-CHG/CHIRPS/DAILY",
+            "acquisition_date": f"{start_date} to {end_date}",
+            "processing_method": "Infrared Cold Cloud Duration (CCD) & Gauge Calibration Reduction",
+            "cloud_filtering": "Thermal Infrared Cloud-Top Temperature Thresholding",
+            "spatial_resolution": "0.05° (~5.5km)",
+            "source": "Google Earth Engine / CHIRPS Hydrological Benchmark",
+            "provenance": "DEMO",
             "total_cumulative_rainfall_mm": 180.0,
             "max_daily_rainfall_mm": 45.0,
             "mean_daily_rainfall_mm": 25.7,
@@ -93,9 +113,5 @@ class GEERainfallService:
                 {"date": "2026-07-06", "rainfall_mm": 26.0},
                 {"date": "2026-07-07", "rainfall_mm": 14.0}
             ],
-            "resolution": "0.05° (~5.5km) Spatial Resolution",
-            "data_source": "Google Earth Engine / CHIRPS Hydrological Benchmark",
-            "provenance": "DEMO",
-            "mode": "DEMO_DATA_MODE",
             "notice": "GEE authentication pending; showing baseline CHIRPS observation product"
         }

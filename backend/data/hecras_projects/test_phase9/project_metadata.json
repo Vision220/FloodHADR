@@ -1,0 +1,16 @@
+{
+  "project_id": "tehri_dam_break_hecras",
+  "title": "Tehri Dam Break HEC-RAS 2D Reference Model",
+  "units": "SI Units",
+  "crs": "EPSG:32644",
+  "project_file_path": "C:\\Users\\Kariy\\OneDrive\\Documents\\FloodHADR\\backend\\data\\hecras_projects\\test_phase9\\tehri_dam_break_hecras.prj",
+  "generated_at": "2026-09-28T02:07:54.563016+00:00",
+  "status": "HEC-RAS PROJECT GENERATED",
+  "files": {
+    "project": "tehri_dam_break_hecras.prj",
+    "geometry": "tehri_dam_break_hecras.g01",
+    "unsteady": "tehri_dam_break_hecras.u01",
+    "plan": "tehri_dam_break_hecras.p01",
+    "terrain": "tehri_terrain.hdf"
+  }
+}

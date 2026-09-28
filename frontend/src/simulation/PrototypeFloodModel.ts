@@ -154,8 +154,9 @@ export class PrototypeFloodModel implements HydrodynamicModel {
       return 0;
     }
 
-    // River channel center is around X = 0
-    const distFromCenter = Math.abs(x);
+    // River channel centerline curves naturally downstream
+    const xRiverCenter = 15.0 * Math.sin((distFromDam) / 40.0) + 0.1 * distFromDam;
+    const distFromCenter = Math.abs(x - xRiverCenter);
 
     // Flood spread width expands as wave moves downstream
     const spreadWidth = 15 + (distFromDam * 0.25) * (this.params.breachWidthM / 100);

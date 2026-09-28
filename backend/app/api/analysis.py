@@ -1,15 +1,24 @@
-from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from typing import Optional, Dict, Any
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Body
+from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.database import get_db
 from app.models.entities import SimulationRunModel
 from app.schemas.schemas import ImpactAnalysisResponse, HADRImpactRequest, RiskThresholdConfig
 from app.gis.impact_analyzer import compute_hadr_impact
+from app.simulation.ai_comparison_assistant import AIHydraulicAssistantService, ScientificAIAssistantService
 
-router = APIRouter(prefix="/simulations", tags=["HADR Decision Analysis"])
+router = APIRouter(prefix="/analysis", tags=["HADR Decision & AI Hydraulic Analysis"])
+ai_assistant_service = AIHydraulicAssistantService()
+scientific_ai_assistant_service = ScientificAIAssistantService()
 
-@router.get("/{sim_id}/impact", response_model=ImpactAnalysisResponse)
+
+class AIExplanationRequest(BaseModel):
+    query_topic: str = Field("why_differ", description="why_differ | where_differ | parameter_diff | mesh_impact | observational_support | calibration_status | uncertainty_analysis")
+
+
+@router.get("/simulations/{sim_id}/impact", response_model=ImpactAnalysisResponse)
 async def get_simulation_hadr_impact(
     sim_id: str,
     low_max_m: Optional[float] = Query(0.5, description="Low risk upper depth threshold (m)"),
@@ -86,3 +95,88 @@ async def run_custom_hadr_impact(
         demo_data_notice=impact_data["demo_data_notice"],
         affected_features=impact_data["affected_features"],
     )
+
+# ----------------------------------------------------
+# Phase 37: AI Hydraulic Model Comparison & Diagnostic Assistant Endpoints
+# ----------------------------------------------------
+
+class AIQueryPayload(BaseModel):
+    question: str = Field("What changed between SWE and DWE?", description="User diagnostic question")
+
+
+@router.get("/ai-assistant/context")
+def get_ai_assistant_context() -> Dict[str, Any]:
+    """
+    Returns full scientific analysis context accessible by the AI Assistant.
+    """
+    return ai_assistant_service.get_full_context()
+
+
+@router.post("/ai-assistant/explain")
+def get_ai_assistant_explanation(req: AIExplanationRequest) -> Dict[str, Any]:
+    """
+    Processes scientific comparison query and returns objective explanation without declaring 'Model X is best'.
+    """
+    return ai_assistant_service.process_query(req.query_topic)
+
+
+@router.post("/ai-assistant/query")
+def process_ai_diagnostic_query(payload: AIQueryPayload) -> Dict[str, Any]:
+    """
+    Phase 37 Scientific AI Diagnostic Assistant endpoint.
+    Processes user questions, calls inspection functions, cites metadata, and appends to AI Audit Log.
+    """
+    return scientific_ai_assistant_service.answer_question(payload.question)
+
+
+@router.get("/ai-assistant/audit-log")
+def get_ai_assistant_audit_log() -> Dict[str, Any]:
+    """
+    Returns full AI Audit Log containing question, retrieved datasets, calculations, answer, timestamp, and model version.
+    """
+    return {
+        "audit_log_count": len(scientific_ai_assistant_service.get_audit_log()),
+        "audit_log": scientific_ai_assistant_service.get_audit_log()
+    }
+
+
+@router.get("/ai-assistant/tools/scenario")
+def tool_get_scenario(scenario_id: str = "TEHRI_PMF_OVERTOPPING_FAILURE_SCENARIO"):
+    """Tool: get_scenario()"""
+    return scientific_ai_assistant_service.get_scenario(scenario_id)
+
+
+@router.get("/ai-assistant/tools/model-result")
+def tool_get_model_result(model_name: str = "FloodHADR SWE", scenario_id: str = "TEHRI_PMF_OVERTOPPING_FAILURE_SCENARIO"):
+    """Tool: get_model_result()"""
+    return scientific_ai_assistant_service.get_model_result(model_name, scenario_id)
+
+
+@router.get("/ai-assistant/tools/virtual-gauge")
+def tool_get_virtual_gauge(gauge_id: str = "gauge-01-dam-toe"):
+    """Tool: get_virtual_gauge()"""
+    return scientific_ai_assistant_service.get_virtual_gauge(gauge_id)
+
+
+@router.get("/ai-assistant/tools/validation-result")
+def tool_get_validation_result(model_a: str = "FloodHADR SWE", model_b: str = "HEC-RAS SWE"):
+    """Tool: get_validation_result()"""
+    return scientific_ai_assistant_service.get_validation_result(model_a, model_b)
+
+
+@router.get("/ai-assistant/tools/flood-extent-statistics")
+def tool_get_flood_extent_statistics(dataset_id: str = "SENTINEL1_SAR"):
+    """Tool: get_flood_extent_statistics()"""
+    return scientific_ai_assistant_service.get_flood_extent_statistics(dataset_id)
+
+
+@router.get("/ai-assistant/tools/asset-impacts")
+def tool_get_asset_impacts(scenario_id: str = "TEHRI_PMF_OVERTOPPING_FAILURE_SCENARIO"):
+    """Tool: get_asset_impacts()"""
+    return scientific_ai_assistant_service.get_asset_impacts(scenario_id)
+
+
+@router.get("/ai-assistant/tools/provenance")
+def tool_get_provenance(item_id: str = "DEM"):
+    """Tool: get_provenance()"""
+    return scientific_ai_assistant_service.get_provenance(item_id)

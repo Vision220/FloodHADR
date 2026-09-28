@@ -1,0 +1,210 @@
+{
+  "project_name": "Tehri Hydro Development Complex",
+  "river_basin": "Bhagirathi River (Ganga Basin)",
+  "state": "Uttarakhand",
+  "district": "Tehri Garhwal",
+  "operator": "THDC India Limited (THDCIL)",
+  "last_updated": "2026-09-26T22:28:00Z",
+  "parameters": {
+    "river_name": {
+      "name": "River Name",
+      "value": "Bhagirathi River",
+      "unit": "text",
+      "source": "THDC India Limited Official Project Profile",
+      "source_type": "OFFICIAL_THDC",
+      "provenance": "OFFICIAL_GOVERNMENT_RECORD",
+      "verification_status": "VERIFIED",
+      "notes": "Bhagirathi River is a principal headstream of the Ganges River, origin at Gaumukh (Gangotri Glacier)."
+    },
+    "dam_type": {
+      "name": "Dam Structural Type",
+      "value": "Earth and Rockfill Dam",
+      "unit": "text",
+      "source": "THDC / CWC Register of Large Dams (2023)",
+      "source_type": "OFFICIAL_THDC",
+      "provenance": "OFFICIAL_GOVERNMENT_RECORD",
+      "verification_status": "VERIFIED",
+      "notes": "Earth core with rockfill shell designed to withstand seismic Zone V accelerations."
+    },
+    "dam_height": {
+      "name": "Dam Height above Foundation",
+      "value": 260.5,
+      "unit": "m",
+      "source": "THDC India Limited / Central Water Commission (CWC)",
+      "source_type": "OFFICIAL_THDC",
+      "provenance": "OFFICIAL_GOVERNMENT_RECORD",
+      "verification_status": "VERIFIED",
+      "notes": "Tallest dam in India and 5th tallest dam in the world. CWC lists 260.5 m; some academic papers cite 260.0 m."
+    },
+    "dam_crest_length": {
+      "name": "Dam Crest Length",
+      "value": 575.0,
+      "unit": "m",
+      "source": "THDC Official Technical Specifications",
+      "source_type": "OFFICIAL_THDC",
+      "provenance": "OFFICIAL_GOVERNMENT_RECORD",
+      "verification_status": "DISCREPANCY_NOTED",
+      "notes": "THDC official specification states 575 m. CWC National Register of Large Dams lists 592 m (including abutment extensions). Both values preserved for sensitivity analysis."
+    },
+    "dam_crest_width": {
+      "name": "Dam Crest Width",
+      "value": 20.0,
+      "unit": "m",
+      "source": "THDC Project Design Manual",
+      "source_type": "OFFICIAL_THDC",
+      "provenance": "OFFICIAL_GOVERNMENT_RECORD",
+      "verification_status": "VERIFIED",
+      "notes": "Crest width at elevation 839.5 m."
+    },
+    "dam_crest_elevation": {
+      "name": "Dam Crest Elevation",
+      "value": 839.5,
+      "unit": "m MSL",
+      "source": "THDC Detailed Project Report (DPR)",
+      "source_type": "OFFICIAL_THDC",
+      "provenance": "OFFICIAL_GOVERNMENT_RECORD",
+      "verification_status": "VERIFIED",
+      "notes": "Provides 4.5 m freeboard above Full Reservoir Level (835.0 m / 830.0 m)."
+    },
+    "gross_storage": {
+      "name": "Gross Reservoir Storage Volume",
+      "value": 3540.0,
+      "unit": "MCM",
+      "source": "THDC India Limited Official DPR",
+      "source_type": "OFFICIAL_THDC",
+      "provenance": "OFFICIAL_GOVERNMENT_RECORD",
+      "verification_status": "DISCREPANCY_NOTED",
+      "notes": "THDC lists 3,540 MCM (3.54 billion m³). NRSC Bhuvan satellite bathymetry estimates 3,530 MCM due to post-2006 reservoir sedimentation. CWC lists 3,540 MCM."
+    },
+    "live_storage": {
+      "name": "Live (Effective) Storage Volume",
+      "value": 2615.0,
+      "unit": "MCM",
+      "source": "THDC / CWC Reservoir Operation Manual",
+      "source_type": "CWC",
+      "provenance": "OFFICIAL_GOVERNMENT_RECORD",
+      "verification_status": "VERIFIED",
+      "notes": "Storage capacity between MDDL (EL 740 m) and FRL (EL 830 m)."
+    },
+    "dead_storage": {
+      "name": "Dead Storage Volume",
+      "value": 925.0,
+      "unit": "MCM",
+      "source": "THDC / CWC Reservoir Operation Rules",
+      "source_type": "CWC",
+      "provenance": "OFFICIAL_GOVERNMENT_RECORD",
+      "verification_status": "VERIFIED",
+      "notes": "Storage below MDDL (EL 740 m) reserved for sediment accumulation over 100-year design life."
+    },
+    "full_reservoir_level": {
+      "name": "Full Reservoir Level (FRL)",
+      "value": 830.0,
+      "unit": "m MSL",
+      "source": "THDC Reservoir Operating Manual",
+      "source_type": "OFFICIAL_THDC",
+      "provenance": "OFFICIAL_GOVERNMENT_RECORD",
+      "verification_status": "DISCREPANCY_NOTED",
+      "notes": "Normal FRL operating limit is EL 830.0 m. Maximum flood level (MWL) during extreme PMF is EL 835.0 m."
+    },
+    "maximum_water_level": {
+      "name": "Maximum Water Level (MWL)",
+      "value": 835.0,
+      "unit": "m MSL",
+      "source": "THDC Spillway Design Guidelines",
+      "source_type": "OFFICIAL_THDC",
+      "provenance": "OFFICIAL_GOVERNMENT_RECORD",
+      "verification_status": "VERIFIED",
+      "notes": "Maximum permissible reservoir elevation during PMF routing."
+    },
+    "minimum_drawdown_level": {
+      "name": "Minimum Drawdown Level (MDDL)",
+      "value": 740.0,
+      "unit": "m MSL",
+      "source": "THDC Power House Operating Manual",
+      "source_type": "OFFICIAL_THDC",
+      "provenance": "OFFICIAL_GOVERNMENT_RECORD",
+      "verification_status": "VERIFIED",
+      "notes": "Lowest operating level for Francis turbines in Underground Power House."
+    },
+    "dead_storage_level": {
+      "name": "Dead Storage Level (DSL)",
+      "value": 720.0,
+      "unit": "m MSL",
+      "source": "CWC Sedimentation Survey Report",
+      "source_type": "CWC",
+      "provenance": "OFFICIAL_GOVERNMENT_RECORD",
+      "verification_status": "VERIFIED",
+      "notes": "Level below which sediment deposition occurs; intake invert is above EL 720 m."
+    },
+    "reservoir_surface_area": {
+      "name": "Reservoir Water Surface Area at FRL",
+      "value": 42.0,
+      "unit": "km²",
+      "source": "NRSC Bhuvan / Sentinel-2 Satellite Observation",
+      "source_type": "NRSC",
+      "provenance": "OBSERVED",
+      "verification_status": "DISCREPANCY_NOTED",
+      "notes": "NRSC Satellite imagery observes 42.0 km² at EL 830 m. THDC DPR lists 45.0 km² at MWL (EL 835 m)."
+    },
+    "power_capacity": {
+      "name": "Tehri Hydroelectric Power Plant Capacity",
+      "value": 1000.0,
+      "unit": "MW",
+      "source": "THDC India Limited Official Website",
+      "source_type": "OFFICIAL_THDC",
+      "provenance": "OFFICIAL_GOVERNMENT_RECORD",
+      "verification_status": "VERIFIED",
+      "notes": "Tehri HPP Stage-I installed capacity is 1,000 MW (4 x 250 MW Francis turbines). Tehri PSP (1,000 MW Pumped Storage) adds 1,000 MW."
+    },
+    "power_units": {
+      "name": "Tehri HPP Generating Units",
+      "value": "4 x 250 MW",
+      "unit": "text",
+      "source": "THDC Generation Records",
+      "source_type": "OFFICIAL_THDC",
+      "provenance": "OFFICIAL_GOVERNMENT_RECORD",
+      "verification_status": "VERIFIED",
+      "notes": "4 vertical Francis turbine-generator units located in Underground Power House on left bank."
+    },
+    "chute_spillway_capacity": {
+      "name": "Chute Spillway Discharge Capacity",
+      "value": 13800.0,
+      "unit": "m³/s",
+      "source": "THDC Hydraulic Design Records / CWC",
+      "source_type": "OFFICIAL_THDC",
+      "provenance": "OFFICIAL_GOVERNMENT_RECORD",
+      "verification_status": "VERIFIED",
+      "notes": "Gated chute spillway equipped with 3 radial gates (14 m x 15.5 m each) on right bank."
+    },
+    "shaft_spillway_capacity": {
+      "name": "Four Shaft Spillways Discharge Capacity",
+      "value": 1740.0,
+      "unit": "m³/s",
+      "source": "THDC Detailed Spillway Design",
+      "source_type": "OFFICIAL_THDC",
+      "provenance": "OFFICIAL_GOVERNMENT_RECORD",
+      "verification_status": "VERIFIED",
+      "notes": "4 ungated vertical morning-glory shaft spillways (2 left bank, 2 right bank) discharging 1,740 m³/s total."
+    },
+    "total_spillway_capacity": {
+      "name": "Total Design Spillway Capacity",
+      "value": 15540.0,
+      "unit": "m³/s",
+      "source": "THDC / CWC Project Approval Specifications",
+      "source_type": "OFFICIAL_THDC",
+      "provenance": "OFFICIAL_GOVERNMENT_RECORD",
+      "verification_status": "VERIFIED",
+      "notes": "Sum of Chute Spillway (13,800 m³/s) + 4 Shaft Spillways (1,740 m³/s) = 15,540 m³/s."
+    },
+    "pmf_design_discharge": {
+      "name": "Probable Maximum Flood (PMF) Design Inflow",
+      "value": 15540.0,
+      "unit": "m³/s",
+      "source": "CWC Flood Frequency Analysis",
+      "source_type": "CWC",
+      "provenance": "OFFICIAL_GOVERNMENT_RECORD",
+      "verification_status": "DISCREPANCY_NOTED",
+      "notes": "CWC official PMF design inflow is 15,540 m³/s. Recent Academic climate studies (IIT Roorkee / IISc 2024) calculate extreme climate-adjusted PMF of 21,400 m³/s under cloudburst scenarios. Both values documented for scenario modeling."
+    }
+  }
+}

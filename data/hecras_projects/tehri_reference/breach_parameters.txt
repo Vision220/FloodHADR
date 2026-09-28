@@ -1,0 +1,8 @@
+Dam Breach Name=Tehri Dam Breach
+Breach Width=180.0
+Breach Bottom Elevation=579.0
+Breach Formation Time=1.5
+Breach Side Slopes=0.5
+Failure Mode=OVERTOPPING
+Reservoir Elevation=830.0
+Calculated Peak Outflow=451774.1

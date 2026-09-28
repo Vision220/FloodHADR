@@ -26,6 +26,24 @@ class StudyAreaDomainSchema(ProvenanceSchema):
     elevation_max_m: float = Field(2600.0, example=2600.0)
 
 
+# Phase 4 TerrainDataset Schema
+class TerrainDatasetSchema(ProvenanceSchema):
+    terrain_id: str = Field(..., example="dem-tehri-alos-12m")
+    source: str = Field("Bhuvan / NRSC ALOS PALSAR 12.5m DEM", example="Bhuvan / NRSC ALOS PALSAR 12.5m DEM")
+    source_url: str = Field("https://bhuvan.nrsc.gov.in", example="https://bhuvan.nrsc.gov.in")
+    CRS: str = Field("EPSG:4326 (WGS84)", example="EPSG:4326 (WGS84)")
+    horizontal_resolution: str = Field("12.5m x 12.5m", example="12.5m x 12.5m")
+    vertical_units: str = Field("meters", example="meters")
+    vertical_datum: str = Field("EGM96 / MSL", example="EGM96 / MSL")
+    nodata: float = Field(-9999.0, example=-9999.0)
+    bounding_box: List[float] = Field(default_factory=lambda: [78.43, 30.33, 78.53, 30.43], example=[78.43, 30.33, 78.53, 30.43])
+    acquisition_date: str = Field("2024-01-15T00:00:00Z", example="2024-01-15T00:00:00Z")
+    checksum: str = Field("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", example="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
+    provenance: str = Field("REAL", example="REAL", description="REAL | OBSERVED | IMPORTED | SYNTHETIC | DEMO")
+    status: str = Field("VERIFIED", example="VERIFIED", description="VERIFIED | VALIDATED | DEMO")
+
+
+
 # 2. Catchment Schema
 class CatchmentSchema(ProvenanceSchema):
     id: str = Field(..., example="cat-bhagirathi-001")
@@ -269,3 +287,69 @@ class DataSourceSchema(ProvenanceSchema):
     coverage_extent: str = Field("Bhagirathi & Ganges Basin", example="Bhagirathi & Ganges Basin")
     license: str = Field("Government Open Data License (GODL-India)", example="Government Open Data License (GODL-India)")
     url: Optional[str] = Field("https://cwc.gov.in", example="https://cwc.gov.in")
+
+
+# ==========================================
+# Phase 2 Authoritative Common Result Structures
+# ==========================================
+
+class ScenarioMetadata(BaseModel):
+    scenario_id: str = Field(..., example="scen-tehri-overtop")
+    title: str = Field("Tehri PMF Overtopping Failure", example="Tehri PMF Overtopping Failure")
+    dam_name: str = Field("Tehri Dam", example="Tehri Dam")
+    study_area_name: str = Field("Tehri River Basin & Downstream Valley", example="Tehri River Basin & Downstream Valley")
+    failure_mode: str = Field("Overtopping", example="Overtopping")
+    breach_width_m: float = Field(180.0, example=180.0)
+    breach_height_m: float = Field(120.0, example=120.0)
+    formation_time_hr: float = Field(1.5, example=1.5)
+    reservoir_water_level_m: float = Field(830.0, example=830.0)
+    mannings_n: float = Field(0.035, example=0.035)
+    parameters: Dict[str, Any] = Field(default_factory=dict)
+
+
+class ModelMetadata(BaseModel):
+    model_id: str = Field(..., example="model-floodhadr-2d-swe")
+    model_name: str = Field("FloodHADR 2D Hydrodynamic Engine", example="FloodHADR 2D Hydrodynamic Engine")
+    model_version: str = Field("v2.0-SWE", example="v2.0-SWE")
+    model_type: str = Field("NATIVE_2D_FINITE_VOLUME", example="NATIVE_2D_FINITE_VOLUME")
+    governing_equations: str = Field("2D Shallow Water Equations / Diffusive Wave Approximation", example="2D Shallow Water Equations")
+    is_installed_and_tested: bool = Field(True, example=True)
+    model_notice: str = Field("Native Authoritative 2D Hydraulic Core", example="Native Authoritative 2D Hydraulic Core")
+
+
+class SimulationFrame(BaseModel):
+    frame_index: int = Field(..., example=0)
+    time_sec: float = Field(..., example=0.0)
+    time_display: str = Field(..., example="00:00:00")
+    progress_percent: float = Field(..., example=0.0)
+    water_depth: List[List[float]] = Field(default_factory=list)
+    water_surface_elevation: List[List[float]] = Field(default_factory=list)
+    velocity: List[List[float]] = Field(default_factory=list)
+    flooded_mask: List[List[bool]] = Field(default_factory=list)
+    peak_discharge_m3s: float = Field(0.0, example=12500.0)
+    max_depth_m: float = Field(0.0, example=14.6)
+    max_velocity_ms: float = Field(0.0, example=8.4)
+    flooded_area_km2: float = Field(0.0, example=184.2)
+
+
+class SimulationRun(BaseModel):
+    scenario_id: str = Field(..., example="scen-tehri-overtop")
+    run_id: str = Field(..., example="sim-2026-001")
+    model_id: str = Field("model-floodhadr-2d-swe", example="model-floodhadr-2d-swe")
+    model_version: str = Field("v2.0-SWE", example="v2.0-SWE")
+    DEM_version: str = Field("ALOS_PALSAR_12M_REAL", example="ALOS_PALSAR_12M_REAL")
+    timestamp: str = Field(default_factory=lambda: datetime.datetime.utcnow().isoformat(), example="2026-09-26T22:00:00Z")
+    parameters: Dict[str, Any] = Field(default_factory=dict)
+    provenance: str = Field("MODELLED", example="MODELLED", description="MODELLED | OBSERVED | SCENARIO | REFERENCE | DEMO")
+    status: str = Field("COMPLETED", example="COMPLETED")
+    scenario_metadata: Optional[ScenarioMetadata] = None
+    model_metadata: Optional[ModelMetadata] = None
+    execution_time_sec: float = Field(0.0, example=42.8)
+    max_flood_area_km2: float = Field(0.0, example=184.2)
+    max_depth_m: float = Field(0.0, example=14.6)
+    max_velocity_ms: float = Field(0.0, example=8.4)
+    affected_population: int = Field(0, example=142500)
+    hydrograph: List[Dict[str, Any]] = Field(default_factory=list)
+    summary_rasters: Dict[str, Any] = Field(default_factory=dict)
+    frames: List[SimulationFrame] = Field(default_factory=list)
+

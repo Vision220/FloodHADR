@@ -48,30 +48,46 @@ class GEEImageryService:
 
                 return {
                     "status": "SUCCESS",
-                    "dataset": "Sentinel-2 MSI Level-2A (COPERNICUS/S2_SR_HARMONIZED)",
+                    "execution_state": "LIVE",
+                    "dataset": "COPERNICUS/S2_SR_HARMONIZED",
+                    "acquisition_date": f"{start_date} to {end_date}",
+                    "processing_method": f"Median Mosaic Surface Reflectance ({preset} Band Composite)",
+                    "cloud_filtering": f"QA60 Cloud Bitmask & Cloudy Pixel Percentage < {cloud_percentage}%",
+                    "spatial_resolution": "10m",
+                    "source": "Google Earth Engine Data Catalog / ESA Copernicus",
+                    "provenance": "OBSERVED",
                     "preset": preset,
                     "tile_url_template": map_id["tile_fetcher"].url_format,
-                    "cloud_percentage_threshold": cloud_percentage,
-                    "observation_period": f"{start_date} to {end_date}",
-                    "resolution": "10m Spatial Resolution",
-                    "data_source": "Google Earth Engine Data Catalog",
-                    "provenance": "OBSERVED",
-                    "mode": "REAL_GEE_AUTHENTICATED"
+                    "cloud_percentage_threshold": cloud_percentage
                 }
             except Exception as e:
                 logger.error(f"GEE Sentinel-2 error: {str(e)}")
+                return {
+                    "status": "ERROR",
+                    "execution_state": "ERROR",
+                    "dataset": "COPERNICUS/S2_SR_HARMONIZED",
+                    "acquisition_date": f"{start_date} to {end_date}",
+                    "processing_method": f"{preset} Composite",
+                    "cloud_filtering": f"< {cloud_percentage}%",
+                    "spatial_resolution": "10m",
+                    "source": "Google Earth Engine Data Catalog",
+                    "provenance": "NOT_CONFIGURED",
+                    "error_detail": str(e)
+                }
 
-        # Fallback response for DEMO / Offline GEE mode
+        # Fallback response for DEMO / Unauthenticated GEE mode
         return {
             "status": "SUCCESS",
-            "dataset": "Sentinel-2 MSI Level-2A (COPERNICUS/S2_SR_HARMONIZED)",
+            "execution_state": "DEMO" if self.client.is_auth is False else "NOT CONFIGURED",
+            "dataset": "COPERNICUS/S2_SR_HARMONIZED",
+            "acquisition_date": f"{start_date} to {end_date}",
+            "processing_method": f"Median Mosaic Surface Reflectance ({preset} Band Composite)",
+            "cloud_filtering": f"QA60 Cloud Bitmask < {cloud_percentage}%",
+            "spatial_resolution": "10m",
+            "source": "Google Earth Engine / ESRI Sentinel-2 EO Feed",
+            "provenance": "DEMO",
             "preset": preset,
             "tile_url_template": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
             "cloud_percentage_threshold": cloud_percentage,
-            "observation_period": f"{start_date} to {end_date}",
-            "resolution": "10m Spatial Resolution",
-            "data_source": "Google Earth Engine / ESRI Sentinel-2 EO Feed",
-            "provenance": "DEMO",
-            "mode": "DEMO_DATA_MODE",
-            "notice": "GEE authentication pending; high-resolution satellite EO feed active"
+            "notice": "GEE authentication pending; showing high-resolution EO baseline"
         }

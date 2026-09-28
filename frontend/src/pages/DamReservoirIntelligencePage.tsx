@@ -76,10 +76,25 @@ interface ReservoirPreset {
   color: string;
 }
 
+import { API_BASE_URL } from '../services/api';
+
+interface TehriParamItem {
+  name: string;
+  value: any;
+  unit: string;
+  source: string;
+  source_type: string;
+  provenance: string;
+  verification_status: string;
+  notes: string;
+}
+
 export const DamReservoirIntelligencePage: React.FC = () => {
   const { setActivePage, selectedScenario, setSelectedScenario } = useApp();
   const [selectedCondition, setSelectedCondition] = useState<string>('cond-normal');
   const [connectionNotice, setConnectionNotice] = useState<string | null>(null);
+  const [showProvenanceTable, setShowProvenanceTable] = useState<boolean>(true);
+  const [structuredParams, setStructuredParams] = useState<Record<string, TehriParamItem>>({});
 
   const [dam, setDam] = useState<DamParams>({
     id: "dam-tehri-demo",
@@ -199,30 +214,37 @@ export const DamReservoirIntelligencePage: React.FC = () => {
     disclaimer_notice: "Simplified hydrostatic calculations for hydrological simulation context only — not a structural safety evaluation or geotechnical dam stability audit."
   });
 
-  // Fetch live dam and reservoir data on mount
+  // Fetch live dam and reservoir data & structured Tehri parameters on mount
   useEffect(() => {
-    fetch('http://localhost:8000/api/dams/dam-tehri-demo')
+    fetch(`${API_BASE_URL}/dams/dam-tehri-demo`)
       .then(res => res.json())
       .then(data => {
         if (data && data.name) setDam(data);
       })
       .catch(() => {});
 
-    fetch('http://localhost:8000/api/reservoirs')
+    fetch(`${API_BASE_URL}/reservoirs`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data) && data[0]) setReservoir(data[0]);
       })
       .catch(() => {});
 
-    fetch('http://localhost:8000/api/reservoirs/conditions/presets')
+    fetch(`${API_BASE_URL}/dams/tehri/parameters`)
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.parameters) setStructuredParams(data.parameters);
+      })
+      .catch(() => {});
+
+    fetch(`${API_BASE_URL}/reservoirs/conditions/presets`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data) && data.length > 0) setPresets(data);
       })
       .catch(() => {});
 
-    fetch('http://localhost:8000/api/dams/dam-tehri-demo/hydrostatics')
+    fetch(`${API_BASE_URL}/dams/dam-tehri-demo/hydrostatics`)
       .then(res => res.json())
       .then(data => {
         if (data && data.hydraulic_head_m) setHydrostatics(data);
@@ -239,7 +261,7 @@ export const DamReservoirIntelligencePage: React.FC = () => {
       current_storage_mm3: cond.storage_mm3
     }));
 
-    fetch('http://localhost:8000/api/dams/calculate-hydrostatics', {
+    fetch(`${API_BASE_URL}/dams/calculate-hydrostatics`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -262,7 +284,7 @@ export const DamReservoirIntelligencePage: React.FC = () => {
   const handleConnectToScenario = async () => {
     const activePreset = presets.find(p => p.id === selectedCondition) || presets[1];
     try {
-      const res = await fetch('http://localhost:8000/api/dams/connect-scenario', {
+      const res = await fetch(`${API_BASE_URL}/dams/connect-scenario`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ condition_id: selectedCondition })
@@ -288,6 +310,7 @@ export const DamReservoirIntelligencePage: React.FC = () => {
       setConnectionNotice(`Preset '${activePreset.name}' (${activePreset.water_level_m}m RL) applied to local scenario context.`);
     }
   };
+
 
   return (
     <div className="space-y-6 select-none font-sans">
@@ -592,8 +615,77 @@ export const DamReservoirIntelligencePage: React.FC = () => {
 
       </div>
 
+      {/* Structured Tehri Parameter Provenance Database Table */}
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-2xl space-y-4">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+          <div>
+            <h3 className="text-lg font-black text-white uppercase tracking-tight flex items-center gap-2">
+              <Shield className="w-5 h-5 text-indigo-400" />
+              Tehri Dam & Reservoir Parameter Provenance Database
+            </h3>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Source hierarchy tracking: OFFICIAL_THDC | CWC | NRSC | ACADEMIC | DERIVED | SCENARIO
+            </p>
+          </div>
+          <button
+            onClick={() => setShowProvenanceTable(!showProvenanceTable)}
+            className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-mono font-bold rounded-lg border border-slate-700"
+          >
+            {showProvenanceTable ? '[HIDE PARAMETER PROVENANCE]' : '[SHOW PARAMETER PROVENANCE]'}
+          </button>
+        </div>
+
+        {showProvenanceTable && (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs font-mono border-collapse">
+              <thead>
+                <tr className="bg-slate-950 text-slate-400 border-b border-slate-800">
+                  <th className="p-3 uppercase">Parameter Name</th>
+                  <th className="p-3 uppercase">Value & Unit</th>
+                  <th className="p-3 uppercase">Source Type</th>
+                  <th className="p-3 uppercase">Official Source</th>
+                  <th className="p-3 uppercase">Verification</th>
+                  <th className="p-3 uppercase">Notes & Discrepancies</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800/60 text-slate-200">
+                {Object.entries(structuredParams).map(([key, item]) => {
+                  const isDiscrepancy = item.verification_status === 'DISCREPANCY_NOTED';
+                  return (
+                    <tr key={key} className={isDiscrepancy ? 'bg-amber-500/10 hover:bg-amber-500/20' : 'hover:bg-slate-800/40'}>
+                      <td className="p-3 font-bold text-white">{item.name}</td>
+                      <td className="p-3 text-sky-400 font-bold">{item.value} <span className="text-slate-400 text-[10px]">{item.unit !== 'text' ? item.unit : ''}</span></td>
+                      <td className="p-3">
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold border ${
+                          item.source_type === 'OFFICIAL_THDC' ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40' :
+                          item.source_type === 'CWC' ? 'bg-sky-500/20 text-sky-300 border-sky-500/40' :
+                          item.source_type === 'NRSC' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' :
+                          'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                        }`}>
+                          {item.source_type}
+                        </span>
+                      </td>
+                      <td className="p-3 text-slate-300">{item.source}</td>
+                      <td className="p-3">
+                        <span className={`text-[10px] px-2 py-0.5 rounded font-bold ${
+                          isDiscrepancy ? 'bg-amber-950 text-amber-300 border border-amber-800' : 'bg-emerald-950 text-emerald-300 border border-emerald-800'
+                        }`}>
+                          {item.verification_status}
+                        </span>
+                      </td>
+                      <td className="p-3 text-[11px] text-slate-400 max-w-xs">{item.notes}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
     </div>
   );
 };
 
 export default DamReservoirIntelligencePage;
+

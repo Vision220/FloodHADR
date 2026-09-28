@@ -100,7 +100,8 @@ export class DigitalTwinEngine {
           floodedCells++;
           // Depth decreases away from center
           const cellDepth = Math.max(0.1, Math.round((maxDepth * Math.max(0.05, 1 - distFromCenter / (3 + maxDepth * 0.4))) * 10) / 10);
-          const cellVel = Math.max(0.2, Math.round((maxVel * (0.6 + Math.random() * 0.4)) * 10) / 10);
+          const cellFactor = Math.max(0.05, 1.0 - distFromCenter / (3 + maxDepth * 0.4));
+          const cellVel = Math.max(0.2, Math.round((maxVel * (0.5 + 0.5 * cellFactor)) * 10) / 10);
           const arrivalMin = Math.round((r * 2.5 + distFromCenter * 0.8) * 10) / 10;
 
           rDepth.push(cellDepth);
